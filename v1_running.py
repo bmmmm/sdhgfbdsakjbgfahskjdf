@@ -41,11 +41,15 @@ class BotManagement(object):
 		f.close()
 
 	def load(self):					#Gespeicherte Daten aus Datei laden
-		f = open(self.settings, 'r')
-		tmp_dict = pickle.loads(f.read())
-		f.close()
-		self.__dict__.update(tmp_dict)	
-		
+		try:
+			f = open(self.settings, 'r')
+			tmp_dict = pickle.loads(f.read())
+			f.close()
+			self.__dict__.update(tmp_dict)	
+			print "settings loaded"
+		except:
+			print "loading error"
+
 	def connectionKey(self):		#Key datei laden
 		with open('key.txt', 'r') as fp:
 			return fp.readline()
@@ -127,6 +131,7 @@ try:
 	while 1:
 		print sekretaer.channels.keys()
 		print sekretaer.users
+		print sekretaer.notes
 		time.sleep(10)
 		
 except KeyboardInterrupt:
