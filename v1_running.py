@@ -17,8 +17,10 @@ class BotManagement(object):
 		self.channels = {}
 		self.chats = {}
 		self.users = {}
+		self.notes = []
 		self.on_pic_dict = {}
 		self.settings = setting_file_name
+		self.id_notes = 0
 		self.load()
 		
 	def addChannel(self,key,value):
@@ -28,6 +30,10 @@ class BotManagement(object):
 	def addChat(self,key,value):
 		self.chats[key] = value
 		print "Chat added"
+	def addnote(self,notiz,user_id):
+		self.notes.append({self.id_notes : {user_id : notiz[1::]}})
+		print "node No.%d added" %self.id_notes
+		self.id_notes +=1
 		
 	def save(self):					#Daten in Datei speichern
 		with open(self.settings, 'w') as fp:
@@ -59,14 +65,19 @@ def on_chat_message(msg):
 		print "user added to database"
 	
 	content_type, chat_type, chat_id = telepot.glance(msg)
-
+	command = msg['text'].lower().split()
 	print('Chat:', content_type, chat_type, chat_id)
 	
 	if chat_type == 'group' and chat_id not in sekretaer.channels.values():
        		sekretaer.channels.update({bot.getChat(chat_id)['title'] : chat_id})
         	print "channel added to database"
-	
-	
+	if command[0] == 'addnote':
+		tmp_user = msg['from']['first_name']
+		sekretaer.addnote(command,tmp_user)
+		bot.sendMessage(chat_id,"Notiz notiert!")
+
+	if command[0] == 'notes?':
+		pass
 	
 	
 def on_callback_query(msg):
