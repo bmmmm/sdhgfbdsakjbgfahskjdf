@@ -36,18 +36,15 @@ class BotManagement(object):
 		self.id_notes +=1
 		
 	def save(self):					#Daten in Datei speichern
-		with open(self.settings, 'w') as fp:
-			pickle.dump(sekretaer,fp)
+		f = open(self.settings, 'w')
+		pickle.dump(self.__dict__, f)
+		f.close()
+
 	def load(self):					#Gespeicherte Daten aus Datei laden
-		with open(self.settings, 'r') as fp:
-			loaded =  pickle.loads(fp.read())
-		self.channels = loaded.channels
-		print loaded.channels
-		self.chats = loaded.chats
-		self.on_pic_dict = loaded.on_pic_dict
-		self.users = loaded.users 
-		
-		print "settings loaded"
+		f = open(self.settings, 'r')
+		tmp_dict = pickle.loads(f.read())
+		f.close()
+		self.__dict__.update(tmp_dict)	
 		
 	def connectionKey(self):		#Key datei laden
 		with open('key.txt', 'r') as fp:
