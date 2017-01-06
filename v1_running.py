@@ -34,7 +34,7 @@ class BotManagement(object):
 
 	def addnote(self,notiz,user_name):
 		self.notes.append({self.id_notes : {user_name : notiz[1::]}})
-		print "node No.%d added" %self.id_notes
+		print "Note #%d added" %self.id_notes
 		self.id_notes +=1
 	
 	def show_notes(self,chat_id):
@@ -46,7 +46,7 @@ class BotManagement(object):
 				mystr = ""
 				for i in range(len(tmp_note_msg)):
 					mystr +="%s " % tmp_note_msg[i]
-				sending_msg = "nodeID : {!s} - user: {!s}  - Notziz: {!s}".format(tmp_note_numer,tmp_note_user,mystr.encode('utf-8'))
+				sending_msg = "note ID #{!s} - notiert von: {!s}  - Notat: {!s}".format(tmp_note_numer,tmp_note_user,mystr.encode('utf-8'))
 				bot.sendMessage(chat_id,sending_msg)
 
 		except:
