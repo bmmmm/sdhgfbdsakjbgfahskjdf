@@ -1,0 +1,59 @@
+ HIER zum Bot hinzuf+gen
+my_users = {296276669: [{u'username': u'bartosz1', u'first_name': u'Bartosz'}], 45420127: [{u'first_name': u'Christian', u'last_name': u'Armbrust'}]}
+
+
+
+#my_users[45420127][0].update({"user_status":1})
+def give_lvl(user_id,user_level):
+    '''
+    user_level      function
+    666             owner
+    1               admin
+    abc             low_user
+    '''
+    try:
+        my_users[user_id][0].update({'user_status':user_level})
+    except Exception as e:
+        print "BOT send adding user level error"
+        print "wrong value {}".format(e)
+
+#give_lvl(45420127,1)
+#print my_users[45420127][0]
+try:
+    if my_users[45420127][0]['user_status'] == 1:
+        print "ncie"
+except:
+    print "user have no status --> add status"
+
+def usr_add_prop(user_id,adding_key,adding_value):
+    try:
+        my_users[user_id][0].update({adding_key:adding_value})
+        sending_msg = "success! added information for user_id #{!s}.".format(user_id)
+        print sending_msg
+
+    except Exception as e:
+        print "BOT send adding user level error"
+        print "wrong value {}".format(e)
+
+
+usr_add_prop(45420127,"penis",333)
+#print my_users[45420127][0]
+
+def usr_db():
+    for user_id, value_list in my_users.iteritems():
+        user_keys = value_list[0].keys()
+        user_values =  value_list[0].values()
+        #print "{!s}".format(str(user_keys))
+        keys_str = ""
+        for i in range(len(user_keys)):
+            keys_str +="%s | " % user_keys[i]
+        values_str = ""
+        for i in range(len(user_keys)):
+            values_str +="%s | " % user_values[i]
+        print "{}\n{}\n{}".format(str(user_id),keys_str,values_str)
+        
+        
+            
+usr_db()
+
+###########################################################
