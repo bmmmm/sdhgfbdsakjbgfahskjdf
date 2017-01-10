@@ -1,3 +1,3 @@
 # sdhgfbdsakjbgfahskjdf
 
-= eine große Scheiße ist das -.-'
+= ist eine gute Sache :)
