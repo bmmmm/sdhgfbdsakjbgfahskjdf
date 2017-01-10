@@ -34,30 +34,36 @@ class BotManagement(object):
 		print "Chat added"
 		
 	def usr_invite(self,user_id,user_msg):
-		invite_count = 0      
+		      
 		if  not self.invite_dict.has_key(user_id):
 			print "{} hat das Codeword gesagt!".format(user_id)
-			sending_msg= "tippe start_raetsel um dein Einlassprozess zu starten"
-			bot.sendMessage(chat_id,sending_msg)
-			self.invite_dict[user_id] =  invite_count
+			sending_msg= "tippe start_raetsel um dein Einlassprozess zu beginnen"
+			bot.sendMessage(user_id,sending_msg)
+			self.invite_dict[user_id] =  1 
+		
 		else:
 			tmp_count = self.invite_dict[user_id]
-			tmp_count+=1
+			print user_msg			
 			self.invite_dict[user_id] =  tmp_count
-			if  self.invite_dict[user_id] == 1 and user_msg == "start_raetsel":
+			if  self.invite_dict[user_id] == 1 and user_msg[0] == "start_raetsel":
 				print "user is in stage 1 . Morsecode senden"
+				morse_file =open('morsecode.wav','r')
 				bot.sendMessage(user_id, 'let it got!')
 				bot.sendDocument(user_id,morse_file)		
-                        
-			if  self.invite_dict[user_id] == 2 and user_msg == "bird":
+                        	self.invite_dict[user_id] = 2
+				morse_file.close()
+			if  self.invite_dict[user_id] == 2 and user_msg[0] == "bird":
 				bot.sendMessage(user_id, '872657 3.1415')
 				print "user is in stage 2"
+				self.invite_dict[user_id] = 3
 
-			if  self.invite_dict[user_id] == 3 and user_msg == "raspberry pi":
-				sending_msg= "Das letzte Raetsel..."
-				bot.sendMessage(user_id,sending_msg)"
-				bot.sendPhoto(user_id,stage3_pic)
-				print "Verein Bild senden"
+			if len(user_msg) == 2:
+				if  self.invite_dict[user_id] == 3 and user_msg[0] == "raspberry" and user_msg[1] == "pi":
+					stage3_pic = open('qq10500_coversecret.png','r')
+					sending_msg= "Das letzte Raetsel..."
+					bot.sendMessage(user_id,sending_msg)
+					bot.sendPhoto(user_id,stage3_pic)
+					stage3_pic.close()
 						
 						
 	def addnote(self,notiz,user_name):
@@ -127,8 +133,6 @@ def on_chat_message(msg):
 	
 	photo_Wu = 'http://hot97svg.com/wp-content/uploads/2014/10/Wu-Tang-Clan.jpg'
 	git_rep_link = 'https://github.com/bmmmm/sdhgfbdsakjbgfahskjdf.git'
-	morse_file = 'morsecode.wav'
-	stage3_pic = 'qq10500_coversecret.png'
 
 	content_type, chat_type, chat_id = telepot.glance(msg)
 	command = msg['text'].lower().split()
@@ -139,7 +143,7 @@ def on_chat_message(msg):
         	print "channel added to database"
 
 	if 'func' in command:
-		sending_msg=('Ich kann: addnote Notiz; notes?; delnote Nr; onair; wu; verein; ')
+		sending_msg=('Ich kann: addnote Notiz; notes?; delnote Nr; onair; wu; verein; git?; ')
 		bot.sendMessage(chat_id,sending_msg)
 	
 	if command[0] == 'addnote':
@@ -164,7 +168,7 @@ def on_chat_message(msg):
 		return bot.sendPhoto(chat_id, photo_Wu)
 		
 	if command[0] == 'git?':
-		this_msg = 'GitHub repositry:\n [click here] (%s)' % git_rep_link
+		this_msg = 'GitHub repositry:\n%s' % git_rep_link
 		bot.sendMessage(chat_id, this_msg, 'Markdown')
 		
 	if 'verein' in command:
@@ -173,23 +177,20 @@ def on_chat_message(msg):
 		#'Markdown' fuer ** bold schreiben / Formatierung
 	if chat_type == 'private' and command[0] == 'invite':
 		user_id = msg['from']['id']
-		user_msg = command[1]
+		user_msg = command[0]
 		sekretaer.usr_invite(user_id,user_msg)
 		
 	if chat_type == 'private' and msg['from']['id'] in sekretaer.invite_dict:
 		user_id = msg['from']['id']
-		user_msg = command[1]
-		sekretaer.usr_invite(user_id,user_msg)
-	else:
-		print "user has no invite"
-		
-		
+		user_msg = command[0:2]
+		sekretaer.usr_invite(user_id,user_msg)		
 	
 	if chat_type == 'private' and command[0] == 'sesam' and command[1] == 'oeffne' and command[2] == 'dich':
 		user_id = msg['from']['id']
 		print " \n!!!! invite user"
 		this_msg = 'https://t.me/joinchat/AAAAAAlUpcizR4bfaFnAeA'
 		bot.sendMessage(user_id, this_msg, 'Markdown')
+
 def on_callback_query(msg):
     query_id, from_id, data = telepot.glance(msg, flavor='callback_query')
     print('Callback query:', query_id, from_id, data)
@@ -258,6 +259,8 @@ try:
 		print sekretaer.users
 		print "notes:"
 		print sekretaer.notes
+		print "invite dict:"
+		print sekretaer.invite_dict
 		safe_count +=1
 		time.sleep(10)
 		
