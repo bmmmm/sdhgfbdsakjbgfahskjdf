@@ -23,6 +23,7 @@ class BotManagement(object):
 		self.settings = setting_file_name
 		self.id_notes = 0
 		self.load()
+		self.invite_dict = {}
 		
 	def addChannel(self,key,value):
 		self.channels[key] = value
@@ -31,7 +32,34 @@ class BotManagement(object):
 	def addChat(self,key,value):
 		self.chats[key] = value
 		print "Chat added"
+		
+	def usr_invite(self,user_id,user_msg):
+		invite_count = 0      
+		if  not self.invite_dict.has_key(user_id):
+			print "{} hat das Codeword gesagt!".format(user_id)
+			sending_msg= "tippe start_raetsel um dein Einlassprozess zu starten"
+			bot.sendMessage(chat_id,sending_msg)
+			self.invite_dict[user_id] =  invite_count
+		else:
+			tmp_count = self.invite_dict[user_id]
+			tmp_count+=1
+			self.invite_dict[user_id] =  tmp_count
+			if  self.invite_dict[user_id] == 1 and user_msg == "start_raetsel":
+				print "user is in stage 1 . Morsecode senden"
+				bot.sendMessage(user_id, 'let it got!')
+				bot.sendDocument(user_id,morse_file)		
+                        
+			if  self.invite_dict[user_id] == 2 and user_msg == "bird":
+				bot.sendMessage(user_id, '872657 3.1415')
+				print "user is in stage 2"
 
+			if  self.invite_dict[user_id] == 3 and user_msg == "raspberry pi":
+				sending_msg= "Das letzte Raetsel..."
+				bot.sendMessage(user_id,sending_msg)"
+				bot.sendPhoto(user_id,stage3_pic)
+				print "Verein Bild senden"
+						
+						
 	def addnote(self,notiz,user_name):
 		self.notes.append({self.id_notes : {user_name : notiz[1::]}})
 		print "Note #%d added" %self.id_notes
@@ -98,6 +126,9 @@ def on_chat_message(msg):
 		print "user added to database"
 	
 	photo_Wu = 'http://hot97svg.com/wp-content/uploads/2014/10/Wu-Tang-Clan.jpg'
+	git_rep_link = 'https://github.com/bmmmm/sdhgfbdsakjbgfahskjdf.git'
+	morse_file = 'morsecode.wav'
+	stage3_pic = 'qq10500_coversecret.png'
 
 	content_type, chat_type, chat_id = telepot.glance(msg)
 	command = msg['text'].lower().split()
@@ -131,12 +162,34 @@ def on_chat_message(msg):
 
 	if 'wu' in command:
 		return bot.sendPhoto(chat_id, photo_Wu)
-
+		
+	if command[0] == 'git?':
+		this_msg = 'GitHub repositry:\n [click here] (%s)' % git_rep_link
+		bot.sendMessage(chat_id, this_msg, 'Markdown')
+		
 	if 'verein' in command:
 		this_msg = 'Verein?! Beschder Verein:\n *%s!*' % bot.getChat(chat_id)['title']
 		bot.sendMessage(chat_id, this_msg, 'Markdown')
 		#'Markdown' fuer ** bold schreiben / Formatierung
+	if chat_type == 'private' and command[0] == 'invite':
+		user_id = msg['from']['id']
+		user_msg = command[1]
+		sekretaer.usr_invite(user_id,user_msg)
+		
+	if chat_type == 'private' and msg['from']['id'] in sekretaer.invite_dict:
+		user_id = msg['from']['id']
+		user_msg = command[1]
+		sekretaer.usr_invite(user_id,user_msg)
+	else:
+		print "user has no invite"
+		
+		
 	
+	if chat_type == 'private' and command[0] == 'sesam' and command[1] == 'oeffne' and command[2] == 'dich':
+		user_id = msg['from']['id']
+		print " \n!!!! invite user"
+		this_msg = 'https://t.me/joinchat/AAAAAAlUpcizR4bfaFnAeA'
+		bot.sendMessage(user_id, this_msg, 'Markdown')
 def on_callback_query(msg):
     query_id, from_id, data = telepot.glance(msg, flavor='callback_query')
     print('Callback query:', query_id, from_id, data)
