@@ -59,11 +59,11 @@ class BotManagement(object):
 
 			if len(user_msg) == 2:
 				if  self.invite_dict[user_id] == 3 and user_msg[0] == "raspberry" and user_msg[1] == "pi":
-					stage3_pic = open('qq10500_coversecret.png','r')
-					sending_msg= "Das letzte Raetsel..."
+					stage3_pic = 'https://chrissto.blob.core.windows.net/tets/stegano.png'
+					sending_msg= "Das letzte Raetsel...(benutze URL)"
 					bot.sendMessage(user_id,sending_msg)
-					bot.sendPhoto(user_id,stage3_pic)
-					stage3_pic.close()
+					bot.sendMessage(user_id,stage3_pic)
+					
 						
 						
 	def addnote(self,notiz,user_name):
