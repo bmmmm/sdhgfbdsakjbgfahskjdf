@@ -76,14 +76,14 @@ class BotManagement(object):
             user_keys = value_list[0].keys()
             user_values = value_list[0].values()
         #print "{!s}".format(str(user_keys))
-        keys_str = ""
-        for i in range(len(user_keys)):
-            keys_str += "%s | " % user_keys[i]
-        values_str = ""
-        for i in range(len(user_keys)):
-            values_str += "%s | " % user_values[i]
-        sending_msg = "userid: {}\n{}\n{}".format(str(user_id), keys_str, values_str)
-        bot.sendMessage(chat_id, sending_msg)
+            keys_str = ""
+            for i in range(len(user_keys)):
+                keys_str += "%s | " % user_keys[i]
+            values_str = ""
+            for i in range(len(user_keys)):
+                values_str += "%s | " % user_values[i]
+            sending_msg = "userid: {}\n{}\n{}".format(str(user_id), keys_str.encode('utf-8'), values_str.encode('utf-8'))
+            bot.sendMessage(chat_id, sending_msg)
 
     def usr_add_prop(self, chat_id, user_id, adding_key, adding_value):
         try:
@@ -94,6 +94,16 @@ class BotManagement(object):
         except Exception as e:
             print "BOT send adding user level error"
             print "wrong value {}".format(e)
+
+    def usr_del_prop(self, chat_id, user_id, del_key):
+	print chat_id, user_id, del_key
+	try:
+		del self.users[user_id][0][del_key]
+		bot.sendMessage(chat_id,"SUCCESS! del_prop")
+	except:
+		e = sys.exc_info()
+		bot.sendMessage(chat_id,"ERROR! del_prop")
+		bot.sendMessage(chat_id,str(e))
 
     def addnote(self, notiz, user_name):
         self.notes.append({self.id_notes: {user_name: notiz[1::]}})
@@ -171,15 +181,24 @@ def on_chat_message(msg):
         print "channel added to database"
 
     if 'func' in command:
-        sending_msg = 'Ich kann: addnote Notiz; notes?; delnote Nr; onair; wu; verein; git?; usrs? '
+        sending_msg = 'Ich kann: addnote Notiz; notes?; delnote Nr;\n onair; wu; verein; git?;\n usrs?; aup?; dup? '
         bot.sendMessage(chat_id, sending_msg)
 
     if command[0] == "usrs?":
         sekretaer.usr_db(chat_id)
-
+    
+    if command[0] == "aup?":
+	bot.sendMessage(chat_id,"add user property => aup USERID KEY VALUE")
     if len(command) == 4:
-        if command[0] == "add_usr_pro":
-            sekretaer.usr_add_prop(chat_id, command[1], command[2], command[3])
+        if command[0] == "aup":
+            sekretaer.usr_add_prop(chat_id, int(command[1]), command[2], command[3])
+
+    if command[0] == "dup?":
+	bot.sendMessage(chat_id,"delete user property => dup USERID KEY")
+
+    if len(command) == 3:
+	if command[0] == "dup":
+		sekretaer.usr_del_prop(chat_id,int(command[1]), command[2])
 
     if command[0] == 'addnote':
         tmp_user = msg['from']['first_name']
