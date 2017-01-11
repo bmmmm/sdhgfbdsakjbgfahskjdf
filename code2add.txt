@@ -1,59 +1,86 @@
- HIER zum Bot hinzuf+gen
-my_users = {296276669: [{u'username': u'bartosz1', u'first_name': u'Bartosz'}], 45420127: [{u'first_name': u'Christian', u'last_name': u'Armbrust'}]}
+ HIER zum Bot
+
+import time
+import datetime
+import pprint
+
+event_Timer_dict = {}
+user_id = 296276669
+today_Event_dic_count = 0
+
+"""
+def modus2(*args):
+    global xoxo_Val
+    
+    if len(args) == 1:
+        xoxo_Val = 0
+    elif len(args) == 2:
+        xoxo_Val = args[1]
+"""
+def calc_event_diff(user_id, onoff, beschreibung):
+        global today_Event_dic_count
+        print "xx"
+        if user_id not in event_Timer_dict:
+                print "go"
+                if onoff == "on":
+                        # INIT
+                        
+                        day_started = time.strftime("%Y-%m-%d %H:%M:%S")
+                        today_Event_dict =  dict(Zeitpunkt = day_started)
+                        today_Event_dict.update({"Beschreibung" : str(beschreibung)})
+                        today_Event_dict.update({"Beginn" : str(day_started)})
+                        today_Event_dict.update({"Ende" : "... running"})
+                        event_Timer_dict[user_id] = { str(today_Event_dic_count): today_Event_dict }
+                        today_Event_dic_count += 1
+        else:
+                if onoff == "on": 
+                        #t1 = datetime.time(12, 55, 0)
+                        day_started = time.strftime("%Y-%m-%d %H:%M:%S")
+                        today_Event_dict =  dict(Zeitpunkt = day_started)       
+                        today_Event_dict.update({"Beschreibung" : str(beschreibung)})
+                        today_Event_dict.update({"Beginn" : str(day_started)})
+                        today_Event_dict.update({"Ende" : "... running"})
+                        event_Timer_dict[user_id].update( {str(today_Event_dic_count): today_Event_dict})
+                        today_Event_dic_count += 1
+                        
+                elif onoff == "off":
+                        
+                        day_ended = time.strftime("%Y-%m-%d %H:%M:%S")
+                        last_user_Event = max(event_Timer_dict[user_id].values())
+                        last_user_Event['Ende'] =  day_ended
+                        #event_Timer_dict[user_id].values()[last_user_Event]["Ende"] = day_ended 
+                        
+                        print day_ended 
+ 
+        #print event_Timer_dict.index(user_id)       
+calc_event_diff(1,"on", "234")
+
+calc_event_diff(user_id,"on", "arbeit")
+
+calc_event_diff(1,"on", "gjkhl")
+time.sleep(2)
+calc_event_diff(1,"on", "af")
+time.sleep(2)
+calc_event_diff(1,"off", "go")
 
 
 
-#my_users[45420127][0].update({"user_status":1})
-def give_lvl(user_id,user_level):
-    '''
-    user_level      function
-    666             owner
-    1               admin
-    abc             low_user
-    '''
-    try:
-        my_users[user_id][0].update({'user_status':user_level})
-    except Exception as e:
-        print "BOT send adding user level error"
-        print "wrong value {}".format(e)
-
-#give_lvl(45420127,1)
-#print my_users[45420127][0]
-try:
-    if my_users[45420127][0]['user_status'] == 1:
-        print "ncie"
-except:
-    print "user have no status --> add status"
-
-def usr_add_prop(user_id,adding_key,adding_value):
-    try:
-        my_users[user_id][0].update({adding_key:adding_value})
-        sending_msg = "success! added information for user_id #{!s}.".format(user_id)
-        print sending_msg
-
-    except Exception as e:
-        print "BOT send adding user level error"
-        print "wrong value {}".format(e)
+#print event_Timer_dict[1]
+print pprint.pprint(event_Timer_dict)
+#print(event_Timer_dict)
 
 
-usr_add_prop(45420127,"penis",333)
-#print my_users[45420127][0]
 
-def usr_db():
-    for user_id, value_list in my_users.iteritems():
-        user_keys = value_list[0].keys()
-        user_values =  value_list[0].values()
-        #print "{!s}".format(str(user_keys))
-        keys_str = ""
-        for i in range(len(user_keys)):
-            keys_str +="%s | " % user_keys[i]
-        values_str = ""
-        for i in range(len(user_keys)):
-            values_str +="%s | " % user_values[i]
-        print "{}\n{}\n{}".format(str(user_id),keys_str,values_str)
-        
-        
-            
-usr_db()
 
-###########################################################
+
+
+
+
+
+
+                        #for id_rowNumber, user_data_List in enumerate(event_Timer_dict):
+                        #        if user_data_List.has_key(user_id):
+                        #                "cool"
+                        #        print id_rowNumber,user_data_List.keys()
+                        
+

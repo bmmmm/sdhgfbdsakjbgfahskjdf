@@ -5,6 +5,7 @@ import random
 import telepot
 import pickle
 import datetime
+import pprint
 
 #from sense_hat import SenseHat
 
@@ -314,11 +315,11 @@ try:
                 print e
                 safe_count = 0
         print "channels:"
-        print sekretaer.channels.keys()
+        print pprint.pprint(sekretaer.channels.keys())
         print "users:"
-        print sekretaer.users
+        print pprint.pprint(sekretaer.users)
         print "notes:"
-        print sekretaer.notes
+        print pprint.pprint(sekretaer.notes)
         print "invite dict:"
         print sekretaer.invite_dict
         safe_count += 1
