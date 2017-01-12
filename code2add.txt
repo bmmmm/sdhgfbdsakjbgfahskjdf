@@ -1,8 +1,8 @@
- HIER zum Bot
-
+#!/usr/bin/python
 import time
-import datetime
+from time import gmtime, strftime, mktime
 import pprint
+import datetime 
 
 event_Timer_dict = {}
 user_id = 296276669
@@ -10,59 +10,87 @@ today_Event_dic_count = 0
 
 """
 def modus2(*args):
-    global xoxo_Val
-    
-    if len(args) == 1:
-        xoxo_Val = 0
-    elif len(args) == 2:
-        xoxo_Val = args[1]
+		global xoxo_Val
+		
+		if len(args) == 1:
+				xoxo_Val = 0
+		elif len(args) == 2:
+				xoxo_Val = args[1]
 """
-def calc_event_diff(user_id, onoff, beschreibung):
-        global today_Event_dic_count
-        print "xx"
-        if user_id not in event_Timer_dict:
-                print "go"
-                if onoff == "on":
-                        # INIT
-                        
-                        day_started = time.strftime("%Y-%m-%d %H:%M:%S")
-                        today_Event_dict =  dict(Zeitpunkt = day_started)
-                        today_Event_dict.update({"Beschreibung" : str(beschreibung)})
-                        today_Event_dict.update({"Beginn" : str(day_started)})
-                        today_Event_dict.update({"Ende" : "... running"})
-                        event_Timer_dict[user_id] = { str(today_Event_dic_count): today_Event_dict }
-                        today_Event_dic_count += 1
-        else:
-                if onoff == "on": 
-                        #t1 = datetime.time(12, 55, 0)
-                        day_started = time.strftime("%Y-%m-%d %H:%M:%S")
-                        today_Event_dict =  dict(Zeitpunkt = day_started)       
-                        today_Event_dict.update({"Beschreibung" : str(beschreibung)})
-                        today_Event_dict.update({"Beginn" : str(day_started)})
-                        today_Event_dict.update({"Ende" : "... running"})
-                        event_Timer_dict[user_id].update( {str(today_Event_dic_count): today_Event_dict})
-                        today_Event_dic_count += 1
-                        
-                elif onoff == "off":
-                        
-                        day_ended = time.strftime("%Y-%m-%d %H:%M:%S")
-                        last_user_Event = max(event_Timer_dict[user_id].values())
-                        last_user_Event['Ende'] =  day_ended
-                        #event_Timer_dict[user_id].values()[last_user_Event]["Ende"] = day_ended 
-                        
-                        print day_ended 
- 
-        #print event_Timer_dict.index(user_id)       
-calc_event_diff(1,"on", "234")
+def calc_Events(user_id, onoff, beschreibung):
+	global today_Event_dic_count
+	t_format = "%Y-%m-%d %H:%M:%S"
+	#print "xx"
+	if user_id not in event_Timer_dict:
+		#print "go"
+		if onoff == "on":
+			"""
+			first run, INIT
+			"""
+			day_started = time.strftime(t_format)
+			today_Event_dict =  dict(Beschreibung = str(beschreibung))
+			#today_Event_dict.update({"Beschreibung" : str(beschreibung)})
+			today_Event_dict.update({"Beginn" : str(day_started)})
+			today_Event_dict.update({"Ende" : "... running"})
+			event_Timer_dict[user_id] = { str(today_Event_dic_count): today_Event_dict }
+			today_Event_dic_count += 1
+	else:
+		if onoff == "on": 
+			#t1 = datetime.time(12, 55, 0)
+			day_started = time.strftime(t_format)
+			today_Event_dict =  dict(Beschreibung = str(beschreibung))       
+			today_Event_dict.update({"Beginn" : str(day_started)})
+			today_Event_dict.update({"Ende" : "... running"})
+			event_Timer_dict[user_id].update( {str(today_Event_dic_count): today_Event_dict})
+			today_Event_dic_count += 1
+									
+		elif onoff == "off":
+									
+			day_ended = time.strftime(t_format)
+			#last_user_Event = max(event_Timer_dict[user_id].values())
+			for user_data_Event_id in event_Timer_dict[user_id]:
+				if beschreibung in event_Timer_dict[user_id][user_data_Event_id].values():
+					event_Timer_dict[user_id][user_data_Event_id]['Ende'] = day_ended
+					tmp_start = event_Timer_dict[user_id][user_data_Event_id]['Beginn']
+					tmp_ende = event_Timer_dict[user_id][user_data_Event_id]['Ende']
+					format_start = mktime(time.strptime(tmp_start,t_format))
+					format_ende =  mktime(time.strptime(tmp_ende,t_format))
+					#dt_obj_start = datetime.strptime(format_start, '%Y-%m-%d %H:%M:%S')
+					#dt_obj_end = datetime.strptime(format_ende, '%Y-%m-%d %H:%M:%S')
+					tdiff = format_ende - format_start
+					format_tdiff = strftime("%H:%M:%S", gmtime(tdiff))
+					event_Timer_dict[user_id][user_data_Event_id].update({"Dauer" : format_tdiff})	
+					 
+											#print tdiff
+def check_Events_running():
+	for user_ids in event_Timer_dict:
+		events_ids = event_Timer_dict[user_ids].keys()
+		for i in events_ids:
+			event_values_list = event_Timer_dict[user_ids][i].values()
+			#print event_values_list
+			for event_value in event_values_list:
+				if event_value == "... running":
+					print event_Timer_dict[user_ids][i]
+		
+							#print user_data_Event_id
 
-calc_event_diff(user_id,"on", "arbeit")
 
-calc_event_diff(1,"on", "gjkhl")
-time.sleep(2)
-calc_event_diff(1,"on", "af")
-time.sleep(2)
-calc_event_diff(1,"off", "go")
+ ######### INFOS
+				# ueberlegen wieviele Timer man startet und wie man den jeweiligen beendet
+				#print event_Timer_dict.index(user_id)       
+calc_Events(1,"on", "234")
 
+calc_Events(user_id,"on", "arbeit")
+
+calc_Events(1,"on", "gjkhl")
+
+calc_Events(1,"on", "af")
+
+calc_Events(1,"on", "afasd")
+calc_Events(1,"off", "af")
+
+calc_Events(user_id,"off", "arbeit")
+check_Events_running()
 
 
 #print event_Timer_dict[1]
@@ -71,16 +99,17 @@ print pprint.pprint(event_Timer_dict)
 
 
 
+										#print event_Timer_dict[user_id]
+										#last_user_Event['Ende'] =  day_ended
+										#event_Timer_dict[user_id].values()[last_user_Event]["Ende"] = day_ended 
 
 
 
 
 
 
-
-                        #for id_rowNumber, user_data_List in enumerate(event_Timer_dict):
-                        #        if user_data_List.has_key(user_id):
-                        #                "cool"
-                        #        print id_rowNumber,user_data_List.keys()
-                        
-
+												#for id_rowNumber, user_data_List in enumerate(event_Timer_dict):
+												#        if user_data_List.has_key(user_id):
+												#                "cool"
+												#        print id_rowNumber,user_data_List.keys()
+												
