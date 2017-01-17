@@ -1,5 +1,6 @@
 import sys
 import time
+from time import gmtime, strftime, mktime
 import threading
 import random
 import telepot
@@ -30,8 +31,8 @@ class BotManagement(object):
         self.id_notes = 0
         self.load()
         self.invite_dict = {}
-		self.event_Timer_dict = {}
-		self.today_Event_dic_count = 0
+	self.event_Timer_dict = {}
+	self.today_Event_dic_count = 0
 
     def addChannel(self, key, value):
         self.channels[key] = value
@@ -72,10 +73,13 @@ class BotManagement(object):
                     bot.sendMessage(user_id, sending_msg)
                     bot.sendMessage(user_id, stage3_pic)
 
-	def calc_Events(self,user_id, onoff, beschreibung):
+    def calc_Events(self,user_id, onoff, beschreibung):
 		t_format = "%Y-%m-%d %H:%M:%S"
+		bot.sendMessage(user_id,onoff)
+		bot.sendMessage(user_id,beschreibung)
 		if user_id not in self.event_Timer_dict:
-			#print "go"
+			print "go"
+			
 			if onoff == "on":
 				"""
 				first run, if user is not in event_Timer_dict -> INIT
@@ -90,6 +94,7 @@ class BotManagement(object):
 		else:
 			if onoff == "on": 
 				#t1 = datetime.time(12, 55, 0)
+				print "bin zweites Mal on"
 				day_started = time.strftime(t_format)
 				today_Event_dict =  dict(Beschreibung = str(beschreibung))       
 				today_Event_dict.update({"Beginn" : str(day_started)})
@@ -98,11 +103,15 @@ class BotManagement(object):
 				self.today_Event_dic_count += 1
 										
 			elif onoff == "off":
-										
+				print "bin timer offf"
+				print beschreibung										
 				day_ended = time.strftime(t_format)
 				#last_user_Event = max(self.event_Timer_dict[user_id].values())
 				for user_data_Event_id in self.event_Timer_dict[user_id]:
+					print "stufe 1"
+					print self.event_Timer_dict[user_id]
 					if beschreibung in self.event_Timer_dict[user_id][user_data_Event_id].values():
+						print "stufe 22222"
 						self.event_Timer_dict[user_id][user_data_Event_id]['Ende'] = day_ended
 						tmp_start = self.event_Timer_dict[user_id][user_data_Event_id]['Beginn']
 						tmp_ende = self.event_Timer_dict[user_id][user_data_Event_id]['Ende']
@@ -114,7 +123,7 @@ class BotManagement(object):
 						format_tdiff = strftime("%H:%M:%S", gmtime(tdiff))
 						self.event_Timer_dict[user_id][user_data_Event_id].update({"Dauer" : format_tdiff})	
 		
-	def check_Events_running(self,user_id):
+    def check_Events_running(self,user_id):
 		events_ids = self.event_Timer_dict[user_id].keys()
 		bot.sendMessage(user_id,'this timer are running')
 		for i in events_ids:
@@ -264,14 +273,14 @@ def on_chat_message(msg):
     if command[0] == 'notes?':
         sekretaer.show_notes(chat_id)
 
-	if command[0] == 'timer':
+    if command[0] == 'timer':
 		if len(command) > 2:
 			if command[1] == 'on':
 				sekretaer.calc_Events(chat_id,command[1],command[2::])
 				bot.sendMessage(chat_id, "timer gestartet")
 			if command[1] == 'off':
 				sekretaer.calc_Events(chat_id,command[1],command[2])
-				
+			bot.sendMessage(chat_id,command)	
 		if command[1] == 'timers?':
 			try:
 				sekretaer.check_Events_running(chat_id)
@@ -389,8 +398,8 @@ try:
         print pprint.pprint(sekretaer.users)
         print "notes:"
         print pprint.pprint(sekretaer.notes)
-		print "user timers:"
-		print pprint.pprint(sekretaer.event_Timer_dict)
+	print "user timers:"
+	print pprint.pprint(sekretaer.event_Timer_dict)
         print "invite dict:"
         print sekretaer.invite_dict
         safe_count += 1
