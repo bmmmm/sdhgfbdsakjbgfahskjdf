@@ -445,16 +445,16 @@ try:
                 print "-- auto save Error!"
                 print e
                 safe_count = 0
-        #print "channels:"
-        #print sekretaer.channels.keys()
-        #print "users:"
-        #print pprint.pprint(sekretaer.users)
-        #print "notes:"
-        #print pprint.pprint(sekretaer.notes)
-        print "user timers:"
-        print pprint.pprint(sekretaer.event_Timer_dict)
-        #print "invite dict:"
-        #print sekretaer.invite_dict
+        print "channels:"
+        print sekretaer.channels.keys()
+        print "users:"
+        print pprint.pprint(sekretaer.users)
+        print "notes:"
+        print pprint.pprint(sekretaer.notes)
+        #print "user timers:"
+        #print pprint.pprint(sekretaer.event_Timer_dict)
+        print "invite dict:"
+        print sekretaer.invite_dict
         safe_count += 1
         time.sleep(3)
 
