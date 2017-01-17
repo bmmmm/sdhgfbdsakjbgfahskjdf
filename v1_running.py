@@ -293,12 +293,14 @@ def on_chat_message(msg):
         sekretaer.channels.update({bot.getChat(chat_id)['title']: chat_id})
         print "channel added to database"
 
-    if 'func' in command:
-        sending_msg = 'Ich kann: addnote Notiz; notes?; delnote Nr;\n onair; wu; verein; git?;\n usrs?; aup?; dup? '
+    if 'funk!' in command:
+        sending_msg = 'Ich kann: addnote Notiz; notes?; delnote Nr;\n onair; wu; verein; git?;\n usrs?; aup?; dup?;\n timer? '
         bot.sendMessage(chat_id, sending_msg)
 
     if command[0] == "usrs?":
         sekretaer.usr_db(chat_id)
+    if command[0] == "timer?":
+        bot.sendMessage(chat_id,"start Timer = timer on [Beschreibung]\n end Timer = timer off #TimerId\n see all timers = timer timers?")    
     
     if command[0] == "aup?":
 	    bot.sendMessage(chat_id,"add user property => aup USERID KEY VALUE")
