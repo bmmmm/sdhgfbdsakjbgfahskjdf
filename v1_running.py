@@ -7,8 +7,9 @@ import telepot
 import pickle
 import datetime
 import pprint
-
-#from sense_hat import SenseHat
+onpi = True
+if onpi == True:
+	from sense_hat import SenseHat
 
 from telepot.namedtuple import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove, ForceReply
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
@@ -275,6 +276,8 @@ class BotManagement(object):
 
 def on_chat_message(msg):
     global time_started
+    global onpi
+    
 
     if msg['from']['id'] not in sekretaer.users:
         temp_dict = msg['from']
@@ -296,6 +299,14 @@ def on_chat_message(msg):
     if 'funk!' in command:
         sending_msg = 'Ich kann: addnote Notiz; notes?; delnote Nr;\n onair; wu; verein; git?;\n usrs?; aup?; dup?;\n timer? '
         bot.sendMessage(chat_id, sending_msg)
+
+    if onpi == True:
+	if chat_id== -156542408:
+		print "rot"
+		sense.clear(255,0,0)  # rot
+		time.sleep(1)
+		sense.clear()
+		print "sensehat cleared"
 
     if command[0] == "usrs?":
         sekretaer.usr_db(chat_id)
@@ -404,8 +415,9 @@ def on_inline_query(msg):
     answerer.answer(msg, compute)
 
 # start init HERE
-#sense = SenseHat()
-#sense.clear()
+if onpi == True:
+	sense = SenseHat()
+	sense.clear()
 time_started = datetime.datetime.now()
 message_with_inline_keyboard = None
 settings_2load = "BotStorage.json"
