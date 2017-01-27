@@ -97,43 +97,43 @@ class BotManagement(object):
                 send_msg = "Timer #{} started".format(int(self.today_Event_dic_count))
                 bot.sendMessage(user_id, send_msg)
                 self.today_Event_dic_count += 1
-        else:
-            if onoff == "on":
-                day_started = strftime(t_format)
-                today_Event_dict = dict(Beschreibung=str(beschreibung))
-                today_Event_dict.update({"Beginn": str(day_started)})
-                today_Event_dict.update({"Ende": "... running"})
-                self.event_Timer_dict[user_id].update(
-                    {self.today_Event_dic_count: today_Event_dict})
-                send_msg = "Timer #{} started".format(int(self.today_Event_dic_count))
-                bot.sendMessage(user_id, send_msg)
-                self.today_Event_dic_count += 1
+            else:
+                if onoff == "on":
+                    day_started = strftime(t_format)
+                    today_Event_dict = dict(Beschreibung=str(beschreibung))
+                    today_Event_dict.update({"Beginn": str(day_started)})
+                    today_Event_dict.update({"Ende": "... running"})
+                    self.event_Timer_dict[user_id].update(
+                        {self.today_Event_dic_count: today_Event_dict})
+                    send_msg = "Timer #{} started".format(int(self.today_Event_dic_count))
+                    bot.sendMessage(user_id, send_msg)
+                    self.today_Event_dic_count += 1
 
-            elif onoff == "off":
-                try:
-                    if int(beschreibung):
-                        user_data_Event_id = int(beschreibung)
-                        day_ended = strftime(t_format)
-                        # last_user_Event = max(self.event_Timer_dict[user_id].values())
-                        try:
-                            if self.event_Timer_dict[user_id][user_data_Event_id]['Ende'] == '... running':
-                                # if beschreibung in self.event_Timer_dict[user_id][user_data_Event_id]['Beschreibung']:
-                                self.event_Timer_dict[user_id][user_data_Event_id]['Ende'] = day_ended
-                                tmp_start = self.event_Timer_dict[user_id][user_data_Event_id]['Beginn']
-                                tmp_ende = self.event_Timer_dict[user_id][user_data_Event_id]['Ende']
-                                format_start = mktime(strptime(tmp_start, t_format))
-                                format_ende = mktime(strptime(tmp_ende, t_format))
-                                tdiff = format_ende - format_start
-                                format_tdiff = strftime("%H:%M:%S", gmtime(tdiff))
-                                self.event_Timer_dict[user_id][
-                                    user_data_Event_id].update({"Dauer": format_tdiff})
-                                bot.sendMessage(user_id, "Timer stopped")
-                        except:
-                            print "Error in timer off"
-                            bot.sendMessage(user_id, "ERROR! wrong Timer Event Id to stop")
-                            print sys.exc_info()
-                except:
-                    bot.sendMessage(user_id, "ERROR! wrong Timer Event Id to stop")
+                elif onoff == "off":
+                    try:
+                        if int(beschreibung):
+                            user_data_Event_id = int(beschreibung)
+                            day_ended = strftime(t_format)
+                            # last_user_Event = max(self.event_Timer_dict[user_id].values())
+                            try:
+                                if self.event_Timer_dict[user_id][user_data_Event_id]['Ende'] == '... running':
+                                    # if beschreibung in self.event_Timer_dict[user_id][user_data_Event_id]['Beschreibung']:
+                                    self.event_Timer_dict[user_id][user_data_Event_id]['Ende'] = day_ended
+                                    tmp_start = self.event_Timer_dict[user_id][user_data_Event_id]['Beginn']
+                                    tmp_ende = self.event_Timer_dict[user_id][user_data_Event_id]['Ende']
+                                    format_start = mktime(strptime(tmp_start, t_format))
+                                    format_ende = mktime(strptime(tmp_ende, t_format))
+                                    tdiff = format_ende - format_start
+                                    format_tdiff = strftime("%H:%M:%S", gmtime(tdiff))
+                                    self.event_Timer_dict[user_id][
+                                        user_data_Event_id].update({"Dauer": format_tdiff})
+                                    bot.sendMessage(user_id, "Timer stopped")
+                            except:
+                                print "Error in timer off"
+                                bot.sendMessage(user_id, "ERROR! wrong Timer Event Id to stop")
+                                print sys.exc_info()
+                    except:
+                        bot.sendMessage(user_id, "ERROR! wrong Timer Event Id to stop")
 
     def check_Events_running(self, user_id):
         total_string = ""
@@ -345,7 +345,7 @@ def on_chat_message(msg):
         print "------------------------------------------------ channel added to database"
 
     if 'funk!' in command:
-        sending_msg = 'Ich kann: addnote Notiz; notes?; delnote Nr;\n onair; wu; verein; git?;\n usrs?; aup?; dup? '
+        sending_msg = 'Ich kann: addnote Notiz;\n notes?; delnote Nr;\n onair; wu; verein; git?;\n usrs?; aup?; dup?\n timer? '
         bot.sendMessage(chat_id, sending_msg)
 
     if onpi is True and chat_id == -156542408:
