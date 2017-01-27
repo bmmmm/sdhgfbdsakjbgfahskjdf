@@ -298,7 +298,7 @@ def on_chat_message(msg):
     git_rep_link = 'https://github.com/bmmmm/sdhgfbdsakjbgfahskjdf.git'
 
     content_type, chat_type, chat_id = telepot.glance(msg)
-    command = msg['text'].lower().split()
+
     if chat_id == 296276669:  # id bm
         command = msg['text'].split()
         # print command
@@ -339,7 +339,7 @@ def on_chat_message(msg):
             bot.sendMessage(chat_id, 'zu viele Argumente')
 
     # print('Chat:', content_type, chat_type, chat_id)
-
+    command = msg['text'].lower().split()
     if chat_type == 'group' and chat_id not in sekretaer.channels.values():
         sekretaer.channels.update({bot.getChat(chat_id)['title']: chat_id})
         print "------------------------------------------------ channel added to database"
@@ -348,13 +348,12 @@ def on_chat_message(msg):
         sending_msg = 'Ich kann: addnote Notiz; notes?; delnote Nr;\n onair; wu; verein; git?;\n usrs?; aup?; dup? '
         bot.sendMessage(chat_id, sending_msg)
 
-    if onpi == True:
-        if chat_id == -156542408:
-            print "rot"
-            sense.clear(255, 0, 0)  # rot
-            time.sleep(1)
-            sense.clear()
-            print "sensehat cleared"
+    if onpi is True and chat_id == -156542408:
+        print "rot"
+        sense.clear(255, 0, 0)  # rot
+        time.sleep(1)
+        sense.clear()
+        print "sensehat cleared"
 
     if command[0] == "usrs?":
         sekretaer.usr_db(chat_id)
