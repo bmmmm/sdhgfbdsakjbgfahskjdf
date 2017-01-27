@@ -82,7 +82,7 @@ class BotManagement(object):
         t_format = "%Y-%m-%d %H:%M:%S"
         if user_id not in self.event_Timer_dict:
             # print "go"
-
+	    #print onff,beschreibung
             if onoff == "on":
                 """
                 first run, if user is not in event_Timer_dict -> INIT
@@ -92,13 +92,12 @@ class BotManagement(object):
                 # today_Event_dict.update({"Beschreibung" : str(beschreibung)})
                 today_Event_dict.update({"Beginn": str(day_started)})
                 today_Event_dict.update({"Ende": "... running"})
-                self.event_Timer_dict[user_id] = {
-                    self.today_Event_dic_count: today_Event_dict}
+                self.event_Timer_dict[user_id] = {self.today_Event_dic_count: today_Event_dict}
                 send_msg = "Timer #{} started".format(int(self.today_Event_dic_count))
                 bot.sendMessage(user_id, send_msg)
                 self.today_Event_dic_count += 1
-            else:
-                if onoff == "on":
+        else:
+            if onoff == "on":
                     day_started = strftime(t_format)
                     today_Event_dict = dict(Beschreibung=str(beschreibung))
                     today_Event_dict.update({"Beginn": str(day_started)})
@@ -109,7 +108,7 @@ class BotManagement(object):
                     bot.sendMessage(user_id, send_msg)
                     self.today_Event_dic_count += 1
 
-                elif onoff == "off":
+            elif onoff == "off":
                     try:
                         if int(beschreibung):
                             user_data_Event_id = int(beschreibung)
@@ -125,15 +124,14 @@ class BotManagement(object):
                                     format_ende = mktime(strptime(tmp_ende, t_format))
                                     tdiff = format_ende - format_start
                                     format_tdiff = strftime("%H:%M:%S", gmtime(tdiff))
-                                    self.event_Timer_dict[user_id][
-                                        user_data_Event_id].update({"Dauer": format_tdiff})
+                                    self.event_Timer_dict[user_id][user_data_Event_id].update({"Dauer": format_tdiff})
                                     bot.sendMessage(user_id, "Timer stopped")
                             except:
                                 print "Error in timer off"
-                                bot.sendMessage(user_id, "ERROR! wrong Timer Event Id to stop")
+                                bot.sendMessage(user_id, "ERROR! no running")
                                 print sys.exc_info()
                     except:
-                        bot.sendMessage(user_id, "ERROR! wrong Timer Event Id to stop")
+                        bot.sendMessage(user_id, "ERROR! wrong timer Event Id to sop")
 
     def check_Events_running(self, user_id):
         total_string = ""
@@ -381,7 +379,7 @@ def on_chat_message(msg):
 
     if command[0] == 'notes?':
         sekretaer.show_notes(chat_id)
-
+    print command
     if command[0] == 'timer':
         if len(command) > 2:
             if command[1] == 'on':
@@ -529,6 +527,6 @@ except KeyboardInterrupt:
         e = sys.exc_info()[1]
         print "-- last save Error!"
         print e
-    else:  # letzte Nachricht an mich senden
-        bot.sendMessage(296276669, "\n$$$$$$$$$$$$$$$$$$$ \nmeine letzten Worte")
-        bot.sendMessage(296276669, sys.exc_info()[1])
+else:  # letzte Nachricht an mich senden
+    bot.sendMessage(296276669, "\n$$$$$$$$$$$$$$$$$$$ \nmeine letzten Worte")
+    bot.sendMessage(296276669, sys.exc_info()[1])
