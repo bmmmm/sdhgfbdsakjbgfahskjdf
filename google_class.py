@@ -1,7 +1,7 @@
 from __future__ import print_function
 import httplib2
 import os
-
+import sys
 from apiclient import discovery
 from oauth2client import client
 from oauth2client import tools
@@ -143,14 +143,16 @@ class Google(object):
         
     def update_Event(self,this_id):
         #this_id = 'br39v72ch8iq84ehk85grbk0ko' #MUSS BEKANNT SEIN !!!
-        
-        antwort_event = self.gCal_service.events().get(calendarId='primary', eventId=this_id).execute()
-        #print (antwort_event)
-        now2 = datetime.datetime.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time
-        antwort_event['end']['dateTime'] = now2
-        updated_event = self.gCal_service.events().update(calendarId='primary', eventId=antwort_event['id'], body=antwort_event).execute()
-        print ("updated time to : %s" % updated_event['updated'])
-
+        #print (this_id)
+	try:
+        	antwort_event = self.gCal_service.events().get(calendarId='primary', eventId=str(this_id)).execute()
+        	#print (antwort_event)
+        	now2 = datetime.datetime.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time
+        	antwort_event['end']['dateTime'] = now2
+        	updated_event = self.gCal_service.events().update(calendarId='primary', eventId=antwort_event['id'], body=antwort_event).execute()
+        	print ("updated time to : %s" % updated_event['updated'])
+	except:
+		print (sys.exc_info()[1])
     def setup_service(self):
         credentials = self.get_credentials()
         http = credentials.authorize(httplib2.Http())

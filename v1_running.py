@@ -29,11 +29,12 @@ class BotManagement(object):
         self.on_pic_dict = {}
         self.settings = setting_file_name
         self.id_notes = 0
-        self.load()
+	self.gcal_IDs = 0
+        self.gcal_IDs_dict = {}
         self.invite_dict = {}
-		self.event_Timer_dict = {}
-		self.today_Event_dic_count = 0
-
+	self.event_Timer_dict = {}
+	self.today_Event_dic_count = 0
+	self.load()
     def addChannel(self, key, value):
         self.channels[key] = value
         print "Channel added"
@@ -231,18 +232,39 @@ def on_chat_message(msg):
 
     content_type, chat_type, chat_id = telepot.glance(msg)
     command = msg['text'].lower().split()
-    if ch_id == 296276669:              #id bm
+    if chat_id == 296276669:              #id bm
         command = msg['text'].split()
-        if len(command) >= 2:
-            if command[0] == 'Gcon':        #google calendar on
+	#print command
+        if len(command) == 3:
+            if command[0] == 'GC':        #google calendar
                 mygoogle = google_class.Google()
-                if command[1] == 's':       #for search
+                if command[1] == 's':       #s for search
                     hours_minutes_string = mygoogle.show_Events(command[2])
-                    stunden = hours_minutes_string[0][0]
+                    
+		    stunden = hours_minutes_string[0][0]
                     minuten = hours_minutes_string[0][1]
                     sending_msg = '[HH:MM] - {}:{}'.format(stunden,minuten)
-		
-		
+		    bot.sendMessage(chat_id, sending_msg)
+		    print "Event found and calculated"
+	    	if command[1] == 'a':	#a for add
+		    tmpdict =  mygoogle.make_Event(command[2])
+		    sekretaer.gcal_IDs +=1
+		    sending_msg = "Event created with id #{}".format(sekretaer.gcal_IDs) 
+		    bot.sendMessage(chat_id,sending_msg)
+		    sekretaer.gcal_IDs_dict = {sekretaer.gcal_IDs : tmpdict.values()[0]}
+		    #print sekretaer.gcal_IDs_dict
+		    print '------ EVENT CREATED --------' 			
+		if command[1] == 'u':		#u for update
+		    try:
+		    	dict_key = command[2]
+		    	tmp_Event_Id =  sekretaer.gcal_IDs_dict[int(dict_key)]
+		    	mygoogle.update_Event(tmp_Event_Id)
+		    	bot.sendMessage(chat_id,'Event updated!')
+		    except: 
+			print "Error in Gcon u!!!"
+			bot.sendMessage(chat_id, 'Event ID not found')
+			
+		del mygoogle
     #print('Chat:', content_type, chat_type, chat_id)
 
     if chat_type == 'group' and chat_id not in sekretaer.channels.values():
@@ -402,8 +424,8 @@ try:
         print pprint.pprint(sekretaer.users)
         print "notes:"
         print pprint.pprint(sekretaer.notes)
-		print "user timers:"
-		print pprint.pprint(sekretaer.event_Timer_dict)
+	print "user timers:"
+	print pprint.pprint(sekretaer.event_Timer_dict)
         print "invite dict:"
         print sekretaer.invite_dict
         safe_count += 1
