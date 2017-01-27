@@ -37,11 +37,11 @@ class BotManagement(object):
 	self.load()
     def addChannel(self, key, value):
         self.channels[key] = value
-        print "Channel added"
+        print "-------------------------------------------- Channel added"
 
     def addChat(self, key, value):
         self.chats[key] = value
-        print "Chat added"
+        print "------------------------------------------------ Chat added"
 
     def usr_invite(self, user_id, user_msg):
 
@@ -150,7 +150,7 @@ class BotManagement(object):
             bot.sendMessage(chat_id, sending_msg)
 
         except Exception as e:
-            print "BOT send adding user level error"
+            print "------------------------------------------------ BOT send adding user level error"
             print "wrong value {}".format(e)
 
     def usr_del_prop(self, chat_id, user_id, del_key):
@@ -165,7 +165,7 @@ class BotManagement(object):
 
     def addnote(self, notiz, user_name):
         self.notes.append({self.id_notes: {user_name: notiz[1::]}})
-        print "Note #%d added" % self.id_notes
+        print "------------------------------------------------ Note #%d added" % self.id_notes
         self.id_notes += 1
 
     def show_notes(self, chat_id):
@@ -183,7 +183,7 @@ class BotManagement(object):
 
         except:
             e = sys.exc_info()[1]
-            print "showing notes error:"
+            print "------------------------------------------------ showing notes error:"
             print e
 
     def del_note(self, chat_id, note_nr):
@@ -209,9 +209,9 @@ class BotManagement(object):
             tmp_dict = pickle.loads(f.read())
             f.close()
             self.__dict__.update(tmp_dict)
-            print "settings loaded"
+            print "------------------------------------------------ settings loaded"
         except:
-            print "loading error"
+            print "------------------------------------------------ loading error"
 
     def connectionKey(self):  #Key datei laden
         with open('key.txt', 'r') as fp:
@@ -225,7 +225,7 @@ def on_chat_message(msg):
         temp_dict = msg['from']
         sekretaer.users[temp_dict.pop('id')] = [temp_dict]
         # TO FIX RICHTIG USERDATABASE ANLEGEN
-        print "user added to database"
+        print "------------------------------------------------ user added to database"
 
     photo_Wu = 'http://hot97svg.com/wp-content/uploads/2014/10/Wu-Tang-Clan.jpg'
     git_rep_link = 'https://github.com/bmmmm/sdhgfbdsakjbgfahskjdf.git'
@@ -235,17 +235,21 @@ def on_chat_message(msg):
     if chat_id == 296276669:              #id bm
         command = msg['text'].split()
 	#print command
-        if len(command) == 3:
+        if len(command) <= 4:
             if command[0] == 'GC':        #google calendar
                 mygoogle = google_class.Google()
-                if command[1] == 's':       #s for search
-                    hours_minutes_string = mygoogle.show_Events(command[2])
-                    
+                if command[1] == 's':       #s for search		
+		    hours_minutes_string = mygoogle.show_Events(command[2])
 		    stunden = hours_minutes_string[0][0]
                     minuten = hours_minutes_string[0][1]
+		    if len(command) == 4 and command[3] == 'all':
+			auflistung = hours_minutes_string[1]
+			send_msg2 = '{}'.format(auflistung)
+			bot.sendMessage(chat_id,send_msg2)
                     sending_msg = '[HH:MM] - {}:{}'.format(stunden,minuten)
 		    bot.sendMessage(chat_id, sending_msg)
-		    print "Event found and calculated"
+		    print "------------------------------------------------ Event found and calculated"
+		    
 	    	if command[1] == 'a':	#a for add
 		    tmpdict =  mygoogle.make_Event(command[2])
 		    sekretaer.gcal_IDs +=1
@@ -253,7 +257,7 @@ def on_chat_message(msg):
 		    bot.sendMessage(chat_id,sending_msg)
 		    sekretaer.gcal_IDs_dict = {sekretaer.gcal_IDs : tmpdict.values()[0]}
 		    #print sekretaer.gcal_IDs_dict
-		    print '------ EVENT CREATED --------' 			
+		    print '------------------------------------------------ EVENT CREATED --------' 			
 		if command[1] == 'u':		#u for update
 		    try:
 		    	dict_key = command[2]
@@ -261,15 +265,17 @@ def on_chat_message(msg):
 		    	mygoogle.update_Event(tmp_Event_Id)
 		    	bot.sendMessage(chat_id,'Event updated!')
 		    except: 
-			print "Error in Gcon u!!!"
+			print "------------------------------------------------ Error in Gcon u!!!"
 			bot.sendMessage(chat_id, 'Event ID not found')
-			
 		del mygoogle
+	else:
+	    bot.sendMessage(chat_id,'zu viele Argumente')
+
     #print('Chat:', content_type, chat_type, chat_id)
 
     if chat_type == 'group' and chat_id not in sekretaer.channels.values():
         sekretaer.channels.update({bot.getChat(chat_id)['title']: chat_id})
-        print "channel added to database"
+        print "------------------------------------------------ channel added to database"
 
     if 'func' in command:
         sending_msg = 'Ich kann: addnote Notiz; notes?; delnote Nr;\n onair; wu; verein; git?;\n usrs?; aup?; dup? '
@@ -312,7 +318,7 @@ def on_chat_message(msg):
 				sekretaer.check_Events_running(chat_id)
 			except:
 				bot.sendMessage(chat_id,'you have no timers')
-				print "error in timer timers?"
+				print "------------------------------------------------ error in timer timers?"
 			
     if command[0] == 'delnote':
         if len(command) == 2:
@@ -347,7 +353,7 @@ def on_chat_message(msg):
 
     if chat_type == 'private' and command[0] == 'sesam' and command[1] == 'oeffne' and command[2] == 'dich':
         user_id = msg['from']['id']
-        print " \n!!!! invite user"
+        print " \n------------------------------------------------ !!!! invite user"
         this_msg = 'https://t.me/joinchat/AAAAAAlUpcizR4bfaFnAeA'
         bot.sendMessage(user_id, this_msg, 'Markdown')
 
@@ -400,22 +406,22 @@ try:
 
 except:
     e = sys.exc_info()[1]
-    print "-- message loop error:"
+    print "-------------------------------------------------- message loop error:"
     print e
 
 try:
     safe_count = 0
 
     while 1:
-        print safe_count
+        print '------------------------------------------------ SAVE COUNT {} ------------------------------------------------'.format(safe_count)
         if safe_count == 6:  # nach einer Minute speichern
             try:
                 sekretaer.save()
-                print '++ auto save done'
+                print '------------------------------------------------ ++ auto save done'
                 safe_count = 0
             except:
                 e = sys.exc_info()[1]
-                print "-- auto save Error!"
+                print "------------------------------------------------ -- auto save Error!"
                 print e
                 safe_count = 0
         print "channels:"
