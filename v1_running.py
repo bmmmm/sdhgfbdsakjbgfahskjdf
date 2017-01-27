@@ -8,7 +8,10 @@ import datetime
 import pprint
 import google_class
 
-#from sense_hat import SenseHat
+# from sense_hat import SenseHat
+onpi = True
+if onpi == True:
+    from sense_hat import SenseHat
 
 from telepot.namedtuple import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove, ForceReply
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
@@ -29,12 +32,13 @@ class BotManagement(object):
         self.on_pic_dict = {}
         self.settings = setting_file_name
         self.id_notes = 0
-	self.gcal_IDs = 0
+        self.gcal_IDs = 0
         self.gcal_IDs_dict = {}
         self.invite_dict = {}
-	self.event_Timer_dict = {}
-	self.today_Event_dic_count = 0
-	self.load()
+        self.event_Timer_dict = {}
+        self.today_Event_dic_count = 0
+        self.load()
+
     def addChannel(self, key, value):
         self.channels[key] = value
         print "-------------------------------------------- Channel added"
@@ -74,73 +78,135 @@ class BotManagement(object):
                     bot.sendMessage(user_id, sending_msg)
                     bot.sendMessage(user_id, stage3_pic)
 
-	def calc_Events(self,user_id, onoff, beschreibung):
-		t_format = "%Y-%m-%d %H:%M:%S"
-		if user_id not in self.event_Timer_dict:
-			#print "go"
-			if onoff == "on":
-				"""
-				first run, if user is not in event_Timer_dict -> INIT
-				"""
-				day_started = time.strftime(t_format)
-				today_Event_dict =  dict(Beschreibung = str(beschreibung))
-				#today_Event_dict.update({"Beschreibung" : str(beschreibung)})
-				today_Event_dict.update({"Beginn" : str(day_started)})
-				today_Event_dict.update({"Ende" : "... running"})
-				self.event_Timer_dict[user_id] = { str(self.today_Event_dic_count): today_Event_dict }
-				self.today_Event_dic_count += 1
-		else:
-			if onoff == "on": 
-				#t1 = datetime.time(12, 55, 0)
-				day_started = time.strftime(t_format)
-				today_Event_dict =  dict(Beschreibung = str(beschreibung))       
-				today_Event_dict.update({"Beginn" : str(day_started)})
-				today_Event_dict.update({"Ende" : "... running"})
-				self.event_Timer_dict[user_id].update( {str(self.today_Event_dic_count): today_Event_dict})
-				self.today_Event_dic_count += 1
-										
-			elif onoff == "off":
-										
-				day_ended = time.strftime(t_format)
-				#last_user_Event = max(self.event_Timer_dict[user_id].values())
-				for user_data_Event_id in self.event_Timer_dict[user_id]:
-					if beschreibung in self.event_Timer_dict[user_id][user_data_Event_id].values():
-						self.event_Timer_dict[user_id][user_data_Event_id]['Ende'] = day_ended
-						tmp_start = self.event_Timer_dict[user_id][user_data_Event_id]['Beginn']
-						tmp_ende = self.event_Timer_dict[user_id][user_data_Event_id]['Ende']
-						format_start = mktime(time.strptime(tmp_start,t_format))
-						format_ende =  mktime(time.strptime(tmp_ende,t_format))
-						#dt_obj_start = datetime.strptime(format_start, '%Y-%m-%d %H:%M:%S')
-						#dt_obj_end = datetime.strptime(format_ende, '%Y-%m-%d %H:%M:%S')
-						tdiff = format_ende - format_start
-						format_tdiff = strftime("%H:%M:%S", gmtime(tdiff))
-						self.event_Timer_dict[user_id][user_data_Event_id].update({"Dauer" : format_tdiff})	
-		
-	def check_Events_running(self,user_id):
-		events_ids = self.event_Timer_dict[user_id].keys()
-		bot.sendMessage(user_id,'this timer are running')
-		for i in events_ids:
-			event_values_list = self.event_Timer_dict[user_id][i].values()
-			#print event_values_list
-			for event_value in event_values_list:
-				if event_value == "... running":
-					sending_msg =  self.event_Timer_dict[user_id][i]
-					print sending_msg
-					bot.sendMessage(user_id,sending_msg)
+    def calc_Events(self, user_id, onoff, beschreibung):
+        t_format = "%Y-%m-%d %H:%M:%S"
+        if user_id not in self.event_Timer_dict:
+            # print "go"
 
-    def usr_db(self,chat_id):
+            if onoff == "on":
+                """
+                first run, if user is not in event_Timer_dict -> INIT
+                """
+                day_started = time.strftime(t_format)
+                today_Event_dict = dict(Beschreibung=str(beschreibung))
+                # today_Event_dict.update({"Beschreibung" : str(beschreibung)})
+                today_Event_dict.update({"Beginn": str(day_started)})
+                today_Event_dict.update({"Ende": "... running"})
+                self.event_Timer_dict[user_id] = {
+                    self.today_Event_dic_count: today_Event_dict}
+                send_msg = "Timer #{} started".format(int(self.today_Event_dic_count))
+                bot.sendMessage(user_id, send_msg)
+                self.today_Event_dic_count += 1
+        else:
+            if onoff == "on":
+                day_started = time.strftime(t_format)
+                today_Event_dict = dict(Beschreibung=str(beschreibung))
+                today_Event_dict.update({"Beginn": str(day_started)})
+                today_Event_dict.update({"Ende": "... running"})
+                self.event_Timer_dict[user_id].update(
+                    {self.today_Event_dic_count: today_Event_dict})
+                send_msg = "Timer #{} started".format(int(self.today_Event_dic_count))
+                bot.sendMessage(user_id, send_msg)
+                self.today_Event_dic_count += 1
+
+            elif onoff == "off":
+                try:
+                    if int(beschreibung):
+                        user_data_Event_id = int(beschreibung)
+                        day_ended = time.strftime(t_format)
+                        # last_user_Event = max(self.event_Timer_dict[user_id].values())
+                        try:
+                            if self.event_Timer_dict[user_id][user_data_Event_id]['Ende'] == '... running':
+                                # if beschreibung in self.event_Timer_dict[user_id][user_data_Event_id]['Beschreibung']:
+                                self.event_Timer_dict[user_id][user_data_Event_id]['Ende'] = day_ended
+                                tmp_start = self.event_Timer_dict[user_id][user_data_Event_id]['Beginn']
+                                tmp_ende = self.event_Timer_dict[user_id][user_data_Event_id]['Ende']
+                                format_start = mktime(time.strptime(tmp_start, t_format))
+                                format_ende = mktime(time.strptime(tmp_ende, t_format))
+                                tdiff = format_ende - format_start
+                                format_tdiff = strftime("%H:%M:%S", gmtime(tdiff))
+                                self.event_Timer_dict[user_id][
+                                    user_data_Event_id].update({"Dauer": format_tdiff})
+                                bot.sendMessage(user_id, "Timer stopped")
+                        except:
+                            print "Error in timer off"
+                            bot.sendMessage(user_id, "ERROR! wrong Timer Event Id to stop")
+                            print sys.exc_info()
+                except:
+                    bot.sendMessage(user_id, "ERROR! wrong Timer Event Id to stop")
+
+    def check_Events_running(self, user_id):
+        total_string = ""
+        events_running = False
+        try:
+            events_keys = self.event_Timer_dict[user_id].keys()
+            for i in events_keys:
+                event_values_list = self.event_Timer_dict[user_id][i].values()
+                # print event_values_list
+                for event_value in event_values_list:
+                    if event_value == "... running":
+                        try:
+                            print "this Event is running"
+                            events_running = True
+                            tmp_dict = self.event_Timer_dict[user_id][i]
+                            timer_number = i
+                            timer_started = tmp_dict['Beginn']
+                            timer_bez = tmp_dict['Beschreibung']
+                            akt_msg = "Timer #{} running...\nBeginn:{}\nBeschreibung: {}\n".format(str(timer_number),
+                                                                                                   timer_started,
+                                                                                                   timer_bez.encode(
+                                                                                                       'utf-8'))
+                            total_string += akt_msg
+                        except:
+                            print "timer timers? 1 "
+                            print sys.exc_info()
+            if events_running == False:
+                bot.sendMessage(user_id, "no events running")
+            tmp_user_Events = self.event_Timer_dict[user_id].keys()
+            for event_Id in tmp_user_Events:
+                tmp_dict = self.event_Timer_dict[user_id][event_Id]
+                timer_number = event_Id
+                if len(tmp_dict.keys()) == 4:
+                    try:
+                        timer_duration = tmp_dict['Dauer']
+                        timer_started = tmp_dict['Beginn']
+                        timer_bez = tmp_dict['Beschreibung']
+                        akt_msg = "Timer #{}\nBeginn: {}\nDauer:{}\nBeschreibung: {}\n".format(str(timer_number),
+                                                                                               timer_started,
+                                                                                               timer_duration,
+                                                                                               timer_bez.encode(
+                                                                                                   'utf-8'))
+                        total_string += akt_msg
+                    except:
+                        print sys.exc_info()
+                        print "timer timers? 2 "
+        except:
+            print sys.exc_info()
+            print "timer timers? 0 "
+        # print total_string
+        bot.sendMessage(user_id, total_string)
+
+    def del_user_Event(self, user_id, event_id):
+        try:
+            del self.event_Timer_dict[user_id][event_id]
+            bot.sendMessage(user_id, "Timer Event deleted!")
+        except:
+            bot.sendMessage(user_id, "ERROR! wrong Event Id!")
+
+    def usr_db(self, chat_id):
 
         for user_id, value_list in self.users.iteritems():
             user_keys = value_list[0].keys()
             user_values = value_list[0].values()
-        #print "{!s}".format(str(user_keys))
+            # print "{!s}".format(str(user_keys))
             keys_str = ""
             for i in range(len(user_keys)):
                 keys_str += "%s | " % user_keys[i]
             values_str = ""
             for i in range(len(user_keys)):
                 values_str += "%s | " % user_values[i]
-            sending_msg = "userid: {}\n{}\n{}".format(str(user_id), keys_str.encode('utf-8'), values_str.encode('utf-8'))
+            sending_msg = "userid: {}\n{}\n{}".format(str(user_id), keys_str.encode('utf-8'),
+                                                      values_str.encode('utf-8'))
             bot.sendMessage(chat_id, sending_msg)
 
     def usr_add_prop(self, chat_id, user_id, adding_key, adding_value):
@@ -154,14 +220,14 @@ class BotManagement(object):
             print "wrong value {}".format(e)
 
     def usr_del_prop(self, chat_id, user_id, del_key):
-	print chat_id, user_id, del_key
-	try:
-		del self.users[user_id][0][del_key]
-		bot.sendMessage(chat_id,"SUCCESS! del_prop")
-	except:
-		e = sys.exc_info()
-		bot.sendMessage(chat_id,"ERROR! del_prop")
-		bot.sendMessage(chat_id,str(e))
+        print chat_id, user_id, del_key
+        try:
+            del self.users[user_id][0][del_key]
+            bot.sendMessage(chat_id, "SUCCESS! del_prop")
+        except:
+            e = sys.exc_info()
+            bot.sendMessage(chat_id, "ERROR! del_prop")
+            bot.sendMessage(chat_id, str(e))
 
     def addnote(self, notiz, user_name):
         self.notes.append({self.id_notes: {user_name: notiz[1::]}})
@@ -198,12 +264,12 @@ class BotManagement(object):
             print sending_msg
             bot.sendMessage(chat_id, sending_msg)
 
-    def save(self):  #Daten in Datei speichern
+    def save(self):  # Daten in Datei speichern
         f = open(self.settings, 'w')
         pickle.dump(self.__dict__, f)
         f.close()
 
-    def load(self):  #Gespeicherte Daten aus Datei laden
+    def load(self):  # Gespeicherte Daten aus Datei laden
         try:
             f = open(self.settings, 'r')
             tmp_dict = pickle.loads(f.read())
@@ -213,13 +279,14 @@ class BotManagement(object):
         except:
             print "------------------------------------------------ loading error"
 
-    def connectionKey(self):  #Key datei laden
+    def connectionKey(self):  # Key datei laden
         with open('key.txt', 'r') as fp:
             return fp.readline()
 
 
 def on_chat_message(msg):
     global time_started
+    global onpi
 
     if msg['from']['id'] not in sekretaer.users:
         temp_dict = msg['from']
@@ -232,70 +299,81 @@ def on_chat_message(msg):
 
     content_type, chat_type, chat_id = telepot.glance(msg)
     command = msg['text'].lower().split()
-    if chat_id == 296276669:              #id bm
+    if chat_id == 296276669:  # id bm
         command = msg['text'].split()
-	#print command
+        # print command
         if len(command) <= 4:
-            if command[0] == 'GC':        #google calendar
+            if command[0] == 'GC':  # google calendar
                 mygoogle = google_class.Google()
-                if command[1] == 's':       #s for search		
-		    hours_minutes_string = mygoogle.show_Events(command[2])
-		    stunden = hours_minutes_string[0][0]
+                if command[1] == 's':  # s for search
+                    hours_minutes_string = mygoogle.show_Events(command[2])
+                    stunden = hours_minutes_string[0][0]
                     minuten = hours_minutes_string[0][1]
-		    if len(command) == 4 and command[3] == 'all':
-			auflistung = hours_minutes_string[1]
-			send_msg2 = '{}'.format(auflistung)
-			bot.sendMessage(chat_id,send_msg2)
-                    sending_msg = '[HH:MM] - {}:{}'.format(stunden,minuten)
-		    bot.sendMessage(chat_id, sending_msg)
-		    print "------------------------------------------------ Event found and calculated"
-		    
-	    	if command[1] == 'a':	#a for add
-		    tmpdict =  mygoogle.make_Event(command[2])
-		    sekretaer.gcal_IDs +=1
-		    sending_msg = "Event created with id #{}".format(sekretaer.gcal_IDs) 
-		    bot.sendMessage(chat_id,sending_msg)
-		    sekretaer.gcal_IDs_dict = {sekretaer.gcal_IDs : tmpdict.values()[0]}
-		    #print sekretaer.gcal_IDs_dict
-		    print '------------------------------------------------ EVENT CREATED --------' 			
-		if command[1] == 'u':		#u for update
-		    try:
-		    	dict_key = command[2]
-		    	tmp_Event_Id =  sekretaer.gcal_IDs_dict[int(dict_key)]
-		    	mygoogle.update_Event(tmp_Event_Id)
-		    	bot.sendMessage(chat_id,'Event updated!')
-		    except: 
-			print "------------------------------------------------ Error in Gcon u!!!"
-			bot.sendMessage(chat_id, 'Event ID not found')
-		del mygoogle
-	else:
-	    bot.sendMessage(chat_id,'zu viele Argumente')
+                    if len(command) == 4 and command[3] == 'all':
+                        auflistung = hours_minutes_string[1]
+                        send_msg2 = '{}'.format(auflistung)
+                        bot.sendMessage(chat_id, send_msg2)
+                    sending_msg = '[HH:MM] - {}:{}'.format(stunden, minuten)
+                    bot.sendMessage(chat_id, sending_msg)
+                    print "------------------------------------------------ Event found and calculated"
 
-    #print('Chat:', content_type, chat_type, chat_id)
+                if command[1] == 'a':  # a for add
+                    tmpdict = mygoogle.make_Event(command[2])
+                    sekretaer.gcal_IDs += 1
+                    sending_msg = "Event created with id #{}".format(sekretaer.gcal_IDs)
+                    bot.sendMessage(chat_id, sending_msg)
+                    sekretaer.gcal_IDs_dict = {sekretaer.gcal_IDs: tmpdict.values()[0]}
+                    # print sekretaer.gcal_IDs_dict
+                    print '------------------------------------------------ EVENT CREATED --------'
+                if command[1] == 'u':  # u for update
+                    try:
+                        dict_key = command[2]
+                        tmp_Event_Id = sekretaer.gcal_IDs_dict[int(dict_key)]
+                        mygoogle.update_Event(tmp_Event_Id)
+                        bot.sendMessage(chat_id, 'Event updated!')
+                    except:
+                        print "------------------------------------------------ Error in Gcon u!!!"
+                        bot.sendMessage(chat_id, 'Event ID not found')
+                del mygoogle
+        else:
+            bot.sendMessage(chat_id, 'zu viele Argumente')
+
+    # print('Chat:', content_type, chat_type, chat_id)
 
     if chat_type == 'group' and chat_id not in sekretaer.channels.values():
         sekretaer.channels.update({bot.getChat(chat_id)['title']: chat_id})
         print "------------------------------------------------ channel added to database"
 
-    if 'func' in command:
+    if 'funk!' in command:
         sending_msg = 'Ich kann: addnote Notiz; notes?; delnote Nr;\n onair; wu; verein; git?;\n usrs?; aup?; dup? '
         bot.sendMessage(chat_id, sending_msg)
 
+    if onpi == True:
+        if chat_id == -156542408:
+            print "rot"
+            sense.clear(255, 0, 0)  # rot
+            time.sleep(1)
+            sense.clear()
+            print "sensehat cleared"
+
     if command[0] == "usrs?":
         sekretaer.usr_db(chat_id)
-    
+    if command[0] == "timer?":
+        bot.sendMessage(chat_id,
+                        "start Timer = timer on [Beschreibung]\n end Timer = timer off #TimerId\n see all timers = timer timers?")
+
     if command[0] == "aup?":
-	bot.sendMessage(chat_id,"add user property => aup USERID KEY VALUE")
+        bot.sendMessage(chat_id, "add user property => aup USERID KEY VALUE")
     if len(command) == 4:
         if command[0] == "aup":
             sekretaer.usr_add_prop(chat_id, int(command[1]), command[2], command[3])
 
     if command[0] == "dup?":
-	bot.sendMessage(chat_id,"delete user property => dup USERID KEY")
+        bot.sendMessage(chat_id, "delete user property => dup USERID KEY")
 
     if len(command) == 3:
-	if command[0] == "dup":
-		sekretaer.usr_del_prop(chat_id,int(command[1]), command[2])
+        if command[0] == "dup":
+            sekretaer.usr_del_prop(chat_id, int(command[1]), command[2])
 
     if command[0] == 'addnote':
         tmp_user = msg['from']['first_name']
@@ -305,21 +383,24 @@ def on_chat_message(msg):
     if command[0] == 'notes?':
         sekretaer.show_notes(chat_id)
 
-	if command[0] == 'timer':
-		if len(command) > 2:
-			if command[1] == 'on':
-				sekretaer.calc_Events(chat_id,command[1],command[2::])
-				bot.sendMessage(chat_id, "timer gestartet")
-			if command[1] == 'off':
-				sekretaer.calc_Events(chat_id,command[1],command[2])
-				
-		if command[1] == 'timers?':
-			try:
-				sekretaer.check_Events_running(chat_id)
-			except:
-				bot.sendMessage(chat_id,'you have no timers')
-				print "------------------------------------------------ error in timer timers?"
-			
+    if command[0] == 'timer':
+        if len(command) > 2:
+            if command[1] == 'on':
+                sekretaer.calc_Events(chat_id, command[1], command[2::])
+            if command[1] == 'off':
+                sekretaer.calc_Events(chat_id, command[1], command[2])
+            if command[1] == 'del':
+                try:
+                    sekretaer.del_user_Event(chat_id, int(command[2]))
+                except:
+                    print "error in del user event"
+
+        if len(command) == 2 and command[1] == 'timers?':
+            try:
+                sekretaer.check_Events_running(chat_id)
+            except:
+                bot.sendMessage(chat_id, 'you have no timers')
+                print "error in timer timers?"
     if command[0] == 'delnote':
         if len(command) == 2:
             sekretaer.del_note(chat_id, int(command[1]))
@@ -340,7 +421,7 @@ def on_chat_message(msg):
     if 'verein' in command:
         this_msg = 'Verein?! Beschder Verein:\n *%s!*' % bot.getChat(chat_id)['title']
         bot.sendMessage(chat_id, this_msg, 'Markdown')
-    #'Markdown' fuer ** bold schreiben / Formatierung
+    # 'Markdown' fuer ** bold schreiben / Formatierung
     if chat_type == 'private' and command[0] == 'invite':
         user_id = msg['from']['id']
         user_msg = command[0]
@@ -382,9 +463,11 @@ def on_inline_query(msg):
 
     answerer.answer(msg, compute)
 
+
 # start init HERE
-#sense = SenseHat()
-#sense.clear()
+if onpi == True:
+    sense = SenseHat()
+    sense.clear()
 time_started = datetime.datetime.now()
 message_with_inline_keyboard = None
 settings_2load = "BotStorage.json"
@@ -413,8 +496,9 @@ try:
     safe_count = 0
 
     while 1:
-        print '------------------------------------------------ SAVE COUNT {} ------------------------------------------------'.format(safe_count)
-        if safe_count == 6:  # nach einer Minute speichern
+        print '------------------------------------------------ SAVE COUNT {} ------------------------------------------------'.format(
+            safe_count)
+        if safe_count == 20:  # nach einer Minute speichern
             try:
                 sekretaer.save()
                 print '------------------------------------------------ ++ auto save done'
@@ -430,8 +514,8 @@ try:
         print pprint.pprint(sekretaer.users)
         print "notes:"
         print pprint.pprint(sekretaer.notes)
-	print "user timers:"
-	print pprint.pprint(sekretaer.event_Timer_dict)
+        # print "user timers:"
+        # print pprint.pprint(sekretaer.event_Timer_dict)
         print "invite dict:"
         print sekretaer.invite_dict
         safe_count += 1
@@ -446,7 +530,6 @@ except KeyboardInterrupt:
         e = sys.exc_info()[1]
         print "-- last save Error!"
         print e
-else:  #letzte Nachricht an mich senden
-    bot.sendMessage(296276669, "\n$$$$$$$$$$$$$$$$$$$ \nmeine letzten Worte")
-    bot.sendMessage(296276669, sys.exc_info()[1])
-#print sekretaer.connectionKey()
+    else:  # letzte Nachricht an mich senden
+        bot.sendMessage(296276669, "\n$$$$$$$$$$$$$$$$$$$ \nmeine letzten Worte")
+        bot.sendMessage(296276669, sys.exc_info()[1])
