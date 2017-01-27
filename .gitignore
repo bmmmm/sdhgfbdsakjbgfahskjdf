@@ -1,5 +1,5 @@
 key.txt
-BotStorage.json
+*.json
 .vscode*
 morsecode.wav
 qq10500_coversecret.png

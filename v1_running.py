@@ -1,5 +1,5 @@
 import sys
-import time
+from time import strftime, mktime, strptime, gmtime, time, sleep
 import threading
 import random
 import telepot
@@ -10,7 +10,7 @@ import google_class
 
 # from sense_hat import SenseHat
 onpi = True
-if onpi == True:
+if onpi is True:
     from sense_hat import SenseHat
 
 from telepot.namedtuple import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove, ForceReply
@@ -87,7 +87,7 @@ class BotManagement(object):
                 """
                 first run, if user is not in event_Timer_dict -> INIT
                 """
-                day_started = time.strftime(t_format)
+                day_started = strftime(t_format)
                 today_Event_dict = dict(Beschreibung=str(beschreibung))
                 # today_Event_dict.update({"Beschreibung" : str(beschreibung)})
                 today_Event_dict.update({"Beginn": str(day_started)})
@@ -99,7 +99,7 @@ class BotManagement(object):
                 self.today_Event_dic_count += 1
         else:
             if onoff == "on":
-                day_started = time.strftime(t_format)
+                day_started = strftime(t_format)
                 today_Event_dict = dict(Beschreibung=str(beschreibung))
                 today_Event_dict.update({"Beginn": str(day_started)})
                 today_Event_dict.update({"Ende": "... running"})
@@ -113,7 +113,7 @@ class BotManagement(object):
                 try:
                     if int(beschreibung):
                         user_data_Event_id = int(beschreibung)
-                        day_ended = time.strftime(t_format)
+                        day_ended = strftime(t_format)
                         # last_user_Event = max(self.event_Timer_dict[user_id].values())
                         try:
                             if self.event_Timer_dict[user_id][user_data_Event_id]['Ende'] == '... running':
@@ -121,8 +121,8 @@ class BotManagement(object):
                                 self.event_Timer_dict[user_id][user_data_Event_id]['Ende'] = day_ended
                                 tmp_start = self.event_Timer_dict[user_id][user_data_Event_id]['Beginn']
                                 tmp_ende = self.event_Timer_dict[user_id][user_data_Event_id]['Ende']
-                                format_start = mktime(time.strptime(tmp_start, t_format))
-                                format_ende = mktime(time.strptime(tmp_ende, t_format))
+                                format_start = mktime(strptime(tmp_start, t_format))
+                                format_ende = mktime(strptime(tmp_ende, t_format))
                                 tdiff = format_ende - format_start
                                 format_tdiff = strftime("%H:%M:%S", gmtime(tdiff))
                                 self.event_Timer_dict[user_id][
@@ -351,7 +351,7 @@ def on_chat_message(msg):
     if onpi is True and chat_id == -156542408:
         print "rot"
         sense.clear(255, 0, 0)  # rot
-        time.sleep(1)
+        sleep(1)
         sense.clear()
         print "sensehat cleared"
 
@@ -518,7 +518,7 @@ try:
         print "invite dict:"
         print sekretaer.invite_dict
         safe_count += 1
-        time.sleep(10)
+        sleep(10)
 
 
 except KeyboardInterrupt:
