@@ -29,6 +29,7 @@ class Google(object):
         self.gCal_service = self.setup_service()
         self.created_id = 0
         self.ids = {}
+
         
         
 
@@ -72,13 +73,16 @@ class Google(object):
         year = today.year
         first_day_of_month =  datetime.datetime(year,monat,1,0,0)
         fomr_beginning = first_day_of_month.isoformat() + 'Z'
-        summe = datetime.time(0,0)
-        print('Getting events for %s' %monat)
+        summe = datetime.timedelta(hours=0,minutes=0)
+        pausenabzug = datetime.timedelta(hours=6)
+        return_String = ""
+        return_String += 'Getting {} for {} ...\n'.format(beschreibung,today.strftime('%B'))
         eventsResult = self.gCal_service.events().list( 
             calendarId='primary',q = beschreibung, timeMin=fomr_beginning, singleEvents=True, #, maxResults=10
             orderBy='startTime').execute()
         events = eventsResult.get('items', [])
-        print ("Anzahl: %s" %len(events))
+        #return_String += ("Anzahl: %s" %len(events))
+        return_String += "Anzahl: {}\n".format(len(events))                       
         if not events:
             print('No upcoming events found.')
         for event in events:
@@ -89,9 +93,26 @@ class Google(object):
             form_end = datetime.datetime.strptime(end[:count],"%Y-%m-%dT%H:%M:%S") 
             form_start =  datetime.datetime.strptime(start[:count],"%Y-%m-%dT%H:%M:%S")
             dauer = form_end - form_start
-            #summe = summe + datetime.timedelta (dauer)
-            print("%s Dauer : %s : %s" % (beschreibung, dauer,start[:count-3])) #Sekunden wegschneiden
-        #print (summe)
+            if dauer >= pausenabzug:
+                abzug = datetime.timedelta(minutes=45)  #45 minutes - 
+                dauer = dauer-abzug
+                
+            summe = summe + dauer
+            #return_String +="Dauer(-Pausenabzug) : %s : %s \n" % (dauer,start[:count-3]) #Sekunden wegschneiden
+            return_String +="Dauer(-Pausenabzug) : {} : {} \n".format(dauer,start[:count-3])
+        if summe.days > 0:
+            days_summe = summe.days*24 #days in hours
+            hours_summe = summe.seconds//3600 #hour-seconds in hours
+            total_hours = days_summe + hours_summe
+            minutes_summe = (summe.seconds//60)%60  #minute-seconds in minutes
+            form_summe = (total_hours,minutes_summe) #hours and minutes
+            
+        else:
+            hours_summe = summe.seconds//3600 #hour-seconds in hours
+            minutes_summe = (summe.seconds//60)%60  #minute-seconds in minutes
+            form_summe = (hours_summe,minutes_summe) #hours and minutes        
+        #print (form_summe)
+        return (form_summe,return_String)
 
     def make_Event(self,beschreibung):
         #beschreibung = "telebot2"
