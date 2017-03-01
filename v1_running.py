@@ -28,7 +28,7 @@ class BotManagement(object):
         self.channels = {}
         self.chats = {}
         self.users = {}
-        self.notes = []
+        self.notes = {}
         self.on_pic_dict = {}
         self.settings = setting_file_name
         self.id_notes = 0
@@ -227,22 +227,25 @@ class BotManagement(object):
             bot.sendMessage(chat_id, "ERROR! del_prop")
             bot.sendMessage(chat_id, str(e))
 
+    def resetnotes(self):
+	self.notes = {}
+	self.id_notes = 0
+
     def addnote(self, notiz, user_name):
-        self.notes.append({self.id_notes: {user_name: notiz[1::]}})
+        self.notes.update({self.id_notes : {user_name : notiz[1::]}})
         print "------------------------------------------------ Note #%d added" % self.id_notes
         self.id_notes += 1
 
     def show_notes(self, chat_id):
-        try:
-            for note_number in range(len(self.notes)):
-                tmp_note_numer = self.notes[note_number].keys()[0]
-                tmp_note_user = self.notes[note_number].values()[0].keys()[0]
-                tmp_note_msg = self.notes[note_number].values()[0].values()[0]
-                mystr = ""
-                for i in range(len(tmp_note_msg)):
-                    mystr += "%s " % tmp_note_msg[i]
-                sending_msg = "note ID #{!s} - notiert von: {!s}  - Notat: {!s}".format(tmp_note_numer, tmp_note_user,
-                                                                                        mystr.encode('utf-8'))
+     	try:
+		sending_msg = ''
+		for notenumber,second_dict in sekretaer.notes.iteritems():
+			tmp_note_user = second_dict.keys()[0]
+			notat = ''
+    			for val in second_dict.itervalues():
+        			for i in xrange(len(val)):
+            				notat += "%s " % val[i]
+    			sending_msg += 'Note ID #'+ str(notenumber) +' - notiert von: '+  tmp_note_user + ' - Notat: ' + notat + '\n'
                 bot.sendMessage(chat_id, sending_msg)
 
         except:
@@ -261,6 +264,7 @@ class BotManagement(object):
             sending_msg = "No note with ID #%d" % note_nr
             print sending_msg
             bot.sendMessage(chat_id, sending_msg)
+	    print sys.exc_info()[0]
 
     def save(self):  # Daten in Datei speichern
         f = open(self.settings, 'w')
@@ -380,6 +384,8 @@ def on_chat_message(msg):
     if command[0] == 'notes?':
         sekretaer.show_notes(chat_id)
     print command
+    if command[0] == 'rrresetnotes':
+	sekretaer.resetnotes()
     if command[0] == 'timer':
         if len(command) > 2:
             if command[1] == 'on':
