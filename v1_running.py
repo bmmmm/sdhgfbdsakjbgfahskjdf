@@ -57,7 +57,7 @@ class BotManagement(object):
 
         else:
             tmp_count = self.invite_dict[user_id]
-            print user_msg
+            #print user_msg
             self.invite_dict[user_id] = tmp_count
             if self.invite_dict[user_id] == 1 and user_msg[0] == "start_raetsel":
                 print "user is in stage 1 . Morsecode senden"
@@ -303,7 +303,7 @@ def on_chat_message(msg):
 
     if chat_id == 296276669:  # id bm
         command = msg['text'].split()
-        print command
+      
         if len(command) <= 4:
             if command[0] == 'GC':  # google calendar
                 mygoogle = google_class.Google()
@@ -340,8 +340,12 @@ def on_chat_message(msg):
         else:
             bot.sendMessage(chat_id, 'zu viele Argumente')
 
-    # print('Chat:', content_type, chat_type, chat_id)
+    # HIER WERDEN NACHRICHTEN INFOS ANGEZEIGT:
+    print('Chat:', content_type, chat_type, chat_id)
     command = msg['text'].lower().split()
+    print ('Command',command)
+
+
     if chat_type == 'group' and chat_id not in sekretaer.channels.values():
         sekretaer.channels.update({bot.getChat(chat_id)['title']: chat_id})
         print "------------------------------------------------ channel added to database"
@@ -520,15 +524,15 @@ try:
                 print "------------------------------------------------ -- auto save Error!"
                 print e
                 safe_count = 0
-        print "channels:"
+        print "channels: DISABLED"
         #print pprint.pprint(sekretaer.channels.keys())
-        print "users:"
-        print pprint.pprint(sekretaer.users)
-        print "notes:"
+        print "users: DISABLED"
+        #print pprint.pprint(sekretaer.users)
+        print "notes: DISABLED"
         #print pprint.pprint(sekretaer.notes)
         # print "user timers:"
         # print pprint.pprint(sekretaer.event_Timer_dict)
-        print "invite dict:"
+        print "invite dict: DISABLED"
         #print sekretaer.invite_dict
         safe_count += 1
         sleep(10)
