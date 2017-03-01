@@ -245,7 +245,7 @@ class BotManagement(object):
     			for val in second_dict.itervalues():
         			for i in xrange(len(val)):
             				notat += "%s " % val[i]
-    			sending_msg += 'Note ID #'+ str(notenumber) +' - notiert von: '+  tmp_note_user + ' - Notat: ' + notat + '\n'
+    			sending_msg += 'NotizID '+ str(notenumber) +' notiert von: '+  tmp_note_user + ' - Notat: ' + notat + '\n'
                 bot.sendMessage(chat_id, sending_msg)
 
         except:
@@ -256,7 +256,7 @@ class BotManagement(object):
     def del_note(self, chat_id, note_nr):
         try:
             del self.notes[note_nr]
-            sending_msg = "Deleted note ID #%d" % note_nr
+            sending_msg = "NotizID %d geloescht." % note_nr
             print sending_msg
             bot.sendMessage(chat_id, sending_msg)
 
@@ -303,7 +303,7 @@ def on_chat_message(msg):
 
     if chat_id == 296276669:  # id bm
         command = msg['text'].split()
-        # print command
+        print command
         if len(command) <= 4:
             if command[0] == 'GC':  # google calendar
                 mygoogle = google_class.Google()
@@ -347,7 +347,10 @@ def on_chat_message(msg):
         print "------------------------------------------------ channel added to database"
 
     if 'funk!' in command:
-        sending_msg = 'Ich kann: addnote Notiz;\n notes?; delnote Nr;\n onair; wu; verein; git?;\n usrs?; aup?; dup?\n timer? '
+        sending_msg = ("Ich kann:" 
+		"\nnotizen?; usrs?; timer?"
+		"\nonair; wu; verein"
+		"\ngit? aup?; dup?")
         bot.sendMessage(chat_id, sending_msg)
 
     if onpi is True and chat_id == -156542408:
@@ -360,17 +363,25 @@ def on_chat_message(msg):
     if command[0] == "usrs?":
         sekretaer.usr_db(chat_id)
     if command[0] == "timer?":
-        bot.sendMessage(chat_id,
-                        "start Timer = timer on [Beschreibung]\n end Timer = timer off #TimerId\n see all timers = timer timers?")
+	sending_msg = ("[t on Beschreibung] = starte Timer mit Beschreibung"
+		"\n[t off TimerID] = Timer mit ID beenden"
+		"\n[t del TimerID] = Timer mit ID loeschen"
+		"\n[t timers?] = alle Timer anzeigen")
 
+        bot.sendMessage(chat_id,sending_msg)
+    if command[0] == 'notizen?':
+	sending_msg = ("[addnote Notat] = Notat/Notiz hinzufuegen"
+			"\n[delnote NotizID] = NotizID loeschen"
+			"\n[notes?] = alle eigenen/Channel  Notizen auflisten") 
+	bot.sendMessage(chat_id,sending_msg)	
     if command[0] == "aup?":
-        bot.sendMessage(chat_id, "add user property => aup USERID KEY VALUE")
+        bot.sendMessage(chat_id, "[aup USERID KEY VALUE] => add user property")
     if len(command) == 4:
         if command[0] == "aup":
             sekretaer.usr_add_prop(chat_id, int(command[1]), command[2], command[3])
 
     if command[0] == "dup?":
-        bot.sendMessage(chat_id, "delete user property => dup USERID KEY")
+        bot.sendMessage(chat_id, "[dup USERID KEY] => delete user property")
 
     if len(command) == 3:
         if command[0] == "dup":
@@ -383,10 +394,10 @@ def on_chat_message(msg):
 
     if command[0] == 'notes?':
         sekretaer.show_notes(chat_id)
-    print command
+   
     if command[0] == 'rrresetnotes':
 	sekretaer.resetnotes()
-    if command[0] == 'timer':
+    if command[0] == 't':
         if len(command) > 2:
             if command[1] == 'on':
                 sekretaer.calc_Events(chat_id, command[1], command[2::])
@@ -489,7 +500,6 @@ try:
                       'inline_query': on_inline_query,
                       'chosen_inline_result': on_chosen_inline_result})
     print('Listening ...')
-
 except:
     e = sys.exc_info()[1]
     print "-------------------------------------------------- message loop error:"
@@ -497,7 +507,6 @@ except:
 
 try:
     safe_count = 0
-
     while 1:
         print '------------------------------------------------ SAVE COUNT {} ------------------------------------------------'.format(
             safe_count)
@@ -512,15 +521,15 @@ try:
                 print e
                 safe_count = 0
         print "channels:"
-        print pprint.pprint(sekretaer.channels.keys())
+        #print pprint.pprint(sekretaer.channels.keys())
         print "users:"
         print pprint.pprint(sekretaer.users)
         print "notes:"
-        print pprint.pprint(sekretaer.notes)
+        #print pprint.pprint(sekretaer.notes)
         # print "user timers:"
         # print pprint.pprint(sekretaer.event_Timer_dict)
         print "invite dict:"
-        print sekretaer.invite_dict
+        #print sekretaer.invite_dict
         safe_count += 1
         sleep(10)
 
