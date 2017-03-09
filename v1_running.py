@@ -8,6 +8,7 @@ import datetime
 import pprint
 import google_class
 
+
 # from sense_hat import SenseHat
 onpi = True
 if onpi is True:
@@ -535,17 +536,17 @@ try:
         print "invite dict: DISABLED"
         #print sekretaer.invite_dict
         safe_count += 1
-        sleep(10)
+        sleep(3)
 
-
-except KeyboardInterrupt:
+except:
     try:
-        sekretaer.save()
         print '++ last save'
+        sekretaer.save()
+	bot.sendMessage(-190416228, "BOT BEENDET")
+	bot.sendMessage(-190416228, str(sys.exc_info()))	
     except:
-        e = sys.exc_info()[1]
+        e = str(sys.exc_info()[1])
         print "-- last save Error!"
         print e
-else:  # letzte Nachricht an mich senden
-    bot.sendMessage(296276669, "\n$$$$$$$$$$$$$$$$$$$ \nmeine letzten Worte")
-    bot.sendMessage(296276669, sys.exc_info()[1])
+	bot.sendMessage(-190416228, "FEHLER bei BOT BEENDEN")
+	bot.sendMessage(-190416228, e)
