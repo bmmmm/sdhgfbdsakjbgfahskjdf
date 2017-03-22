@@ -1,13 +1,9 @@
 import sys
 from time import strftime, mktime, strptime, gmtime, time, sleep
 import threading
-import random
-import telepot
-import pickle
-import datetime
+import telepot, pickle, datetime
 import pprint
-import google_class
-
+import google_class, md5, urllib2
 
 # from sense_hat import SenseHat
 onpi = True
@@ -58,7 +54,7 @@ class BotManagement(object):
 
         else:
             tmp_count = self.invite_dict[user_id]
-            #print user_msg
+            # print user_msg
             self.invite_dict[user_id] = tmp_count
             if self.invite_dict[user_id] == 1 and user_msg[0] == "start_raetsel":
                 print "user is in stage 1 . Morsecode senden"
@@ -83,7 +79,7 @@ class BotManagement(object):
         t_format = "%Y-%m-%d %H:%M:%S"
         if user_id not in self.event_Timer_dict:
             # print "go"
-	    #print onff,beschreibung
+            # print onff,beschreibung
             if onoff == "on":
                 """
                 first run, if user is not in event_Timer_dict -> INIT
@@ -99,40 +95,40 @@ class BotManagement(object):
                 self.today_Event_dic_count += 1
         else:
             if onoff == "on":
-                    day_started = strftime(t_format)
-                    today_Event_dict = dict(Beschreibung=str(beschreibung))
-                    today_Event_dict.update({"Beginn": str(day_started)})
-                    today_Event_dict.update({"Ende": "... running"})
-                    self.event_Timer_dict[user_id].update(
-                        {self.today_Event_dic_count: today_Event_dict})
-                    send_msg = "Timer #{} started".format(int(self.today_Event_dic_count))
-                    bot.sendMessage(user_id, send_msg)
-                    self.today_Event_dic_count += 1
+                day_started = strftime(t_format)
+                today_Event_dict = dict(Beschreibung=str(beschreibung))
+                today_Event_dict.update({"Beginn": str(day_started)})
+                today_Event_dict.update({"Ende": "... running"})
+                self.event_Timer_dict[user_id].update(
+                    {self.today_Event_dic_count: today_Event_dict})
+                send_msg = "Timer #{} started".format(int(self.today_Event_dic_count))
+                bot.sendMessage(user_id, send_msg)
+                self.today_Event_dic_count += 1
 
             elif onoff == "off":
-                    try:
-                        if int(beschreibung):
-                            user_data_Event_id = int(beschreibung)
-                            day_ended = strftime(t_format)
-                            # last_user_Event = max(self.event_Timer_dict[user_id].values())
-                            try:
-                                if self.event_Timer_dict[user_id][user_data_Event_id]['Ende'] == '... running':
-                                    # if beschreibung in self.event_Timer_dict[user_id][user_data_Event_id]['Beschreibung']:
-                                    self.event_Timer_dict[user_id][user_data_Event_id]['Ende'] = day_ended
-                                    tmp_start = self.event_Timer_dict[user_id][user_data_Event_id]['Beginn']
-                                    tmp_ende = self.event_Timer_dict[user_id][user_data_Event_id]['Ende']
-                                    format_start = mktime(strptime(tmp_start, t_format))
-                                    format_ende = mktime(strptime(tmp_ende, t_format))
-                                    tdiff = format_ende - format_start
-                                    format_tdiff = strftime("%H:%M:%S", gmtime(tdiff))
-                                    self.event_Timer_dict[user_id][user_data_Event_id].update({"Dauer": format_tdiff})
-                                    bot.sendMessage(user_id, "Timer stopped")
-                            except:
-                                print "Error in timer off"
-                                bot.sendMessage(user_id, "ERROR! no running")
-                                print sys.exc_info()
-                    except:
-                        bot.sendMessage(user_id, "ERROR! wrong timer Event Id to sop")
+                try:
+                    if int(beschreibung):
+                        user_data_Event_id = int(beschreibung)
+                        day_ended = strftime(t_format)
+                        # last_user_Event = max(self.event_Timer_dict[user_id].values())
+                        try:
+                            if self.event_Timer_dict[user_id][user_data_Event_id]['Ende'] == '... running':
+                                # if beschreibung in self.event_Timer_dict[user_id][user_data_Event_id]['Beschreibung']:
+                                self.event_Timer_dict[user_id][user_data_Event_id]['Ende'] = day_ended
+                                tmp_start = self.event_Timer_dict[user_id][user_data_Event_id]['Beginn']
+                                tmp_ende = self.event_Timer_dict[user_id][user_data_Event_id]['Ende']
+                                format_start = mktime(strptime(tmp_start, t_format))
+                                format_ende = mktime(strptime(tmp_ende, t_format))
+                                tdiff = format_ende - format_start
+                                format_tdiff = strftime("%H:%M:%S", gmtime(tdiff))
+                                self.event_Timer_dict[user_id][user_data_Event_id].update({"Dauer": format_tdiff})
+                                bot.sendMessage(user_id, "Timer stopped")
+                        except:
+                            print "Error in timer off"
+                            bot.sendMessage(user_id, "ERROR! no running")
+                            print sys.exc_info()
+                except:
+                    bot.sendMessage(user_id, "ERROR! wrong timer Event Id to sop")
 
     def check_Events_running(self, user_id):
         total_string = ""
@@ -229,25 +225,26 @@ class BotManagement(object):
             bot.sendMessage(chat_id, str(e))
 
     def resetnotes(self):
-	self.notes = {}
-	self.id_notes = 0
+        self.notes = {}
+        self.id_notes = 0
 
     def addnote(self, notiz, user_name):
-        self.notes.update({self.id_notes : {user_name : notiz[1::]}})
+        self.notes.update({self.id_notes: {user_name: notiz[1::]}})
         print "------------------------------------------------ Note #%d added" % self.id_notes
         self.id_notes += 1
 
     def show_notes(self, chat_id):
-     	try:
-		sending_msg = ''
-		for notenumber,second_dict in sekretaer.notes.iteritems():
-			tmp_note_user = second_dict.keys()[0]
-			notat = ''
-    			for val in second_dict.itervalues():
-        			for i in xrange(len(val)):
-            				notat += "%s " % val[i]
-    			sending_msg += 'NotizID '+ str(notenumber) +' notiert von: '+  tmp_note_user + ' - Notat: ' + notat + '\n'
-                bot.sendMessage(chat_id, sending_msg)
+        try:
+            sending_msg = ''
+            for notenumber, second_dict in sekretaer.notes.iteritems():
+                tmp_note_user = second_dict.keys()[0]
+                notat = ''
+                for val in second_dict.itervalues():
+                    for i in xrange(len(val)):
+                        notat += "%s " % val[i]
+                sending_msg += 'NotizID ' + str(
+                    notenumber) + ' notiert von: ' + tmp_note_user + ' - Notat: ' + notat + '\n'
+            bot.sendMessage(chat_id, sending_msg)
 
         except:
             e = sys.exc_info()[1]
@@ -265,7 +262,21 @@ class BotManagement(object):
             sending_msg = "No note with ID #%d" % note_nr
             print sending_msg
             bot.sendMessage(chat_id, sending_msg)
-	    print sys.exc_info()[0]
+            print sys.exc_info()[0]
+
+    def checkurl(self, urls):
+        try:
+            site_code = urllib2.urlopen(urls, timeout=1).getcode()
+            if site_code == 200:
+                print "Valid URL"
+                return True
+            else:
+                print "ERROR with URL Server"
+                return False
+
+        except urllib2.URLError:
+            print "ERROR! wrong URL"
+            return False
 
     def save(self):  # Daten in Datei speichern
         f = open(self.settings, 'w')
@@ -304,7 +315,7 @@ def on_chat_message(msg):
 
     if chat_id == 296276669:  # id bm
         command = msg['text'].split()
-      
+
         if len(command) <= 4:
             if command[0] == 'GC':  # google calendar
                 mygoogle = google_class.Google()
@@ -344,18 +355,18 @@ def on_chat_message(msg):
     # HIER WERDEN NACHRICHTEN INFOS ANGEZEIGT:
     print('Chat:', content_type, chat_type, chat_id)
     command = msg['text'].lower().split()
-    print ('Command',command)
-
+    print ('Command', command)
 
     if chat_type == 'group' and chat_id not in sekretaer.channels.values():
         sekretaer.channels.update({bot.getChat(chat_id)['title']: chat_id})
         print "------------------------------------------------ channel added to database"
 
     if 'funk!' in command:
-        sending_msg = ("Ich kann:" 
-		"\nnotizen?; usrs?; timer?"
-		"\nonair; wu; verein"
-		"\ngit? aup?; dup?")
+        sending_msg = ("Ich kann:"
+                       "\nnotizen?; usrs?; timer?"
+                       "\nonair; wu; verein"
+                       "\ngit? aup?; dup?"
+                       "\nhash?")
         bot.sendMessage(chat_id, sending_msg)
 
     if onpi is True and chat_id == -156542408:
@@ -368,19 +379,25 @@ def on_chat_message(msg):
     if command[0] == "usrs?":
         sekretaer.usr_db(chat_id)
     if command[0] == "timer?":
-	sending_msg = ("[t on Beschreibung] = starte Timer mit Beschreibung"
-		"\n[t off TimerID] = Timer mit ID beenden"
-		"\n[t del TimerID] = Timer mit ID loeschen"
-		"\n[t timers?] = alle Timer anzeigen")
+        sending_msg = ("[t on Beschreibung] = starte Timer mit Beschreibung"
+                       "\n[t off TimerID] = Timer mit ID beenden"
+                       "\n[t del TimerID] = Timer mit ID loeschen"
+                       "\n[t timers?] = alle Timer anzeigen")
 
-        bot.sendMessage(chat_id,sending_msg)
+        bot.sendMessage(chat_id, sending_msg)
     if command[0] == 'notizen?':
-	sending_msg = ("[addnote Notat] = Notat/Notiz hinzufuegen"
-			"\n[delnote NotizID] = NotizID loeschen"
-			"\n[notes?] = alle eigenen/Channel  Notizen auflisten") 
-	bot.sendMessage(chat_id,sending_msg)	
+        sending_msg = ("[addnote Notat] = Notat/Notiz hinzufuegen"
+                       "\n[delnote NotizID] = NotizID loeschen"
+                       "\n[notes?] = alle eigenen/Channel  Notizen auflisten")
+        bot.sendMessage(chat_id, sending_msg)
     if command[0] == "aup?":
         bot.sendMessage(chat_id, "[aup USERID KEY VALUE] => add user property")
+    if command[0] == "hash?":
+        sending_msg = ("chat private with SekretaerBot!"
+                       "\nI support following hashes:"
+                       "\nMD5,SHA1, SHA256, SHA384, SHA512"
+                       "\n[hash HASHTYPE URL/file] = HASHTYPE wird auf URL/file angewendet")
+        bot.sendMessage(chat_id, sending_msg)
     if len(command) == 4:
         if command[0] == "aup":
             sekretaer.usr_add_prop(chat_id, int(command[1]), command[2], command[3])
@@ -399,9 +416,9 @@ def on_chat_message(msg):
 
     if command[0] == 'notes?':
         sekretaer.show_notes(chat_id)
-   
+
     if command[0] == 'rrresetnotes':
-	sekretaer.resetnotes()
+        sekretaer.resetnotes()
     if command[0] == 't':
         if len(command) > 2:
             if command[1] == 'on':
@@ -445,6 +462,34 @@ def on_chat_message(msg):
         user_id = msg['from']['id']
         user_msg = command[0]
         sekretaer.usr_invite(user_id, user_msg)
+    if chat_type == 'private' and command[0] == 'hash':
+        if len(command) == 3:  # MD5,SHA1, SHA256, SHA384, SHA512"
+            myHash = md5.HASH()
+            if command[1].lower() == 'md5':
+                myHash.hash_flag = 0
+            elif command[1].lower() == 'sha1':
+                myHash.hash_flag = 1
+            elif command[1].lower() == 'sha256':
+                myHash.hash_flag = 2
+            elif command[1].lower() == 'sha384':
+                myHash.hash_flag = 3
+            elif command[1].lower() == 'sha512':
+                myHash.hash_flag = 4
+            else:
+                bot.sendMessage(chat_id, "ERROR wrong hash_flag!")
+                print "ERROR wrong hash_flag!"
+                return
+            if sekretaer.checkurl(command[2]):
+                hashed = myHash.hashFromURL()
+                sending_msg = ("ich habe folgenden hash gefunden"
+                               "\nhashtype: {}"
+                               "\nhashed file: {}"
+                               "\nhash: {}").format(command[1], myHash.downloaded_file, hashed)
+                print command[1], myHash.downloaded_file, hashed
+                bot.sendMessage(chat_id, sending_msg)
+            else:
+                bot.sendMessage(chat_id, "ERROR with URL!")
+                print "ERROR! with URL in HASH"
 
     if chat_type == 'private' and msg['from']['id'] in sekretaer.invite_dict:
         user_id = msg['from']['id']
@@ -475,10 +520,10 @@ def on_inline_query(msg):
 
         result_type = query_string[-1:].lower()
 
-    if result_type == 'test':
-        pass
-    else:
-        return 1
+        if result_type == 'test':
+            pass
+        else:
+            return 1
 
     answerer.answer(msg, compute)
 
@@ -526,15 +571,15 @@ try:
                 print e
                 safe_count = 0
         print "channels: DISABLED"
-        #print pprint.pprint(sekretaer.channels.keys())
+        # print pprint.pprint(sekretaer.channels.keys())
         print "users: DISABLED"
-        #print pprint.pprint(sekretaer.users)
+        # print pprint.pprint(sekretaer.users)
         print "notes: DISABLED"
-        #print pprint.pprint(sekretaer.notes)
+        # print pprint.pprint(sekretaer.notes)
         # print "user timers:"
         # print pprint.pprint(sekretaer.event_Timer_dict)
         print "invite dict: DISABLED"
-        #print sekretaer.invite_dict
+        # print sekretaer.invite_dict
         safe_count += 1
         sleep(3)
 
@@ -542,11 +587,11 @@ except:
     try:
         print '++ last save'
         sekretaer.save()
-	bot.sendMessage(-190416228, "BOT BEENDET")
-	bot.sendMessage(-190416228, str(sys.exc_info()))	
+        bot.sendMessage(-190416228, "BOT BEENDET")
+        bot.sendMessage(-190416228, str(sys.exc_info()))
     except:
         e = str(sys.exc_info()[1])
         print "-- last save Error!"
         print e
-	bot.sendMessage(-190416228, "FEHLER bei BOT BEENDEN")
-	bot.sendMessage(-190416228, e)
+        bot.sendMessage(-190416228, "FEHLER bei BOT BEENDEN")
+        bot.sendMessage(-190416228, e)
