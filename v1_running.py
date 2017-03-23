@@ -25,6 +25,7 @@ class BotManagement(object):
         self.channels = {}
         self.chats = {}
         self.users = {}
+	self.md5Lib = {}
         self.notes = {}
         self.on_pic_dict = {}
         self.settings = setting_file_name
@@ -480,7 +481,8 @@ def on_chat_message(msg):
                 print "ERROR wrong hash_flag!"
                 return
             if sekretaer.checkurl(command[2]):
-                hashed = myHash.hashFromURL()
+		sekretaer.md5Lib.update({chat_id: command[2] })		
+                hashed = myHash.hashFromURL(command[2])
                 sending_msg = ("ich habe folgenden hash gefunden"
                                "\nhashtype: {}"
                                "\nhashed file: {}"
@@ -490,7 +492,7 @@ def on_chat_message(msg):
             else:
                 bot.sendMessage(chat_id, "ERROR with URL!")
                 print "ERROR! with URL in HASH"
-
+	    del(myHash)
     if chat_type == 'private' and msg['from']['id'] in sekretaer.invite_dict:
         user_id = msg['from']['id']
         user_msg = command[0:2]
@@ -580,7 +582,8 @@ try:
         # print pprint.pprint(sekretaer.event_Timer_dict)
         print "invite dict: DISABLED"
         # print sekretaer.invite_dict
-        safe_count += 1
+        print sekretaer.md5Lib
+	safe_count += 1
         sleep(3)
 
 except:

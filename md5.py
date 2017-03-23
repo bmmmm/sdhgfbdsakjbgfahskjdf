@@ -27,7 +27,7 @@ class HASH(object):
             if self.hash_flag == 0:
                 m = hashlib.md5()
             elif self.hash_flag == 1:
-                m = hashlib.sh1()
+                m = hashlib.sha1()
             elif self.hash_flag == 2:
                 m = hashlib.sha256()
             elif self.hash_flag == 3:
