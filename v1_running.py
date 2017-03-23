@@ -25,7 +25,7 @@ class BotManagement(object):
         self.channels = {}
         self.chats = {}
         self.users = {}
-	self.md5Lib = {}
+	self.hashLib = {}
         self.notes = {}
         self.on_pic_dict = {}
         self.settings = setting_file_name
@@ -267,8 +267,8 @@ class BotManagement(object):
 
     def checkurl(self, urls):
         try:
-            site_code = urllib2.urlopen(urls, timeout=1).getcode()
-            if site_code == 200:
+            site_code = urllib2.urlopen(urls).getcode()
+	    if site_code == 200:
                 print "Valid URL"
                 return True
             else:
@@ -355,7 +355,7 @@ def on_chat_message(msg):
 
     # HIER WERDEN NACHRICHTEN INFOS ANGEZEIGT:
     print('Chat:', content_type, chat_type, chat_id)
-    command = msg['text'].lower().split()
+    command = msg['text'].split()
     print ('Command', command)
 
     if chat_type == 'group' and chat_id not in sekretaer.channels.values():
@@ -394,8 +394,8 @@ def on_chat_message(msg):
     if command[0] == "aup?":
         bot.sendMessage(chat_id, "[aup USERID KEY VALUE] => add user property")
     if command[0] == "hash?":
-        sending_msg = ("chat private with SekretaerBot!"
-                       "\nI support following hashes:"
+        sending_msg = ("!!! Funktion NUR im privaten Chat moeglich !!!"
+                       "\nIch kann folgende  hashes:"
                        "\nMD5,SHA1, SHA256, SHA384, SHA512"
                        "\n[hash HASHTYPE URL/file] = HASHTYPE wird auf URL/file angewendet")
         bot.sendMessage(chat_id, sending_msg)
@@ -465,29 +465,31 @@ def on_chat_message(msg):
         sekretaer.usr_invite(user_id, user_msg)
     if chat_type == 'private' and command[0] == 'hash':
         if len(command) == 3:  # MD5,SHA1, SHA256, SHA384, SHA512"
+	    tmp_cmd = command
             myHash = md5.HASH()
-            if command[1].lower() == 'md5':
+            if tmp_cmd[1].lower() == 'md5':
                 myHash.hash_flag = 0
-            elif command[1].lower() == 'sha1':
+            elif tmp_cmd[1].lower() == 'sha1':
                 myHash.hash_flag = 1
-            elif command[1].lower() == 'sha256':
+            elif tmp_cmd[1].lower() == 'sha256':
                 myHash.hash_flag = 2
-            elif command[1].lower() == 'sha384':
+            elif tmp_cmd[1].lower() == 'sha384':
                 myHash.hash_flag = 3
-            elif command[1].lower() == 'sha512':
+            elif tmp_cmd[1].lower() == 'sha512':
                 myHash.hash_flag = 4
             else:
                 bot.sendMessage(chat_id, "ERROR wrong hash_flag!")
                 print "ERROR wrong hash_flag!"
                 return
             if sekretaer.checkurl(command[2]):
-		sekretaer.md5Lib.update({chat_id: command[2] })		
-                hashed = myHash.hashFromURL(command[2])
+		
+		# sekretaer.hashLib.update({chat_id: {datetime.datetime.utcnow().isoformat()[:-7]: command[2]}})		
+		hashed = myHash.hashFromURL(command[2])
                 sending_msg = ("ich habe folgenden hash gefunden"
                                "\nhashtype: {}"
                                "\nhashed file: {}"
                                "\nhash: {}").format(command[1], myHash.downloaded_file, hashed)
-                print command[1], myHash.downloaded_file, hashed
+               	print command[1], myHash.downloaded_file, hashed
                 bot.sendMessage(chat_id, sending_msg)
             else:
                 bot.sendMessage(chat_id, "ERROR with URL!")
@@ -582,7 +584,7 @@ try:
         # print pprint.pprint(sekretaer.event_Timer_dict)
         print "invite dict: DISABLED"
         # print sekretaer.invite_dict
-        print sekretaer.md5Lib
+        
 	safe_count += 1
         sleep(3)
 
