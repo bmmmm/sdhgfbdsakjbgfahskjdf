@@ -6,7 +6,7 @@ import pprint
 import google_class, md5, urllib2
 
 # from sense_hat import SenseHat
-onpi = True
+onpi = False
 if onpi is True:
     from sense_hat import SenseHat
 
@@ -314,11 +314,11 @@ def on_chat_message(msg):
 
     content_type, chat_type, chat_id = telepot.glance(msg)
 
-    if chat_id == 296276669:  # id bm
+    if chat_type=='private' and  chat_id == 296276669:  # id bm
         command = msg['text'].split()
 
         if len(command) <= 4:
-            if command[0] == 'GC':  # google calendar
+            if command[0].lower() == 'gc':  # google calendar
                 mygoogle = google_class.Google()
                 if command[1] == 's':  # s for search
                     hours_minutes_string = mygoogle.show_Events(command[2])
@@ -362,7 +362,7 @@ def on_chat_message(msg):
         sekretaer.channels.update({bot.getChat(chat_id)['title']: chat_id})
         print "------------------------------------------------ channel added to database"
 
-    if 'funk!' in command:
+    if  command[0].lower()== 'help' or 'help?' ==  command[0].lower():
         sending_msg = ("Ich kann:"
                        "\nnotizen?; usrs?; timer?"
                        "\nonair; wu; verein"
@@ -377,21 +377,21 @@ def on_chat_message(msg):
         sense.clear()
         print "sensehat cleared"
 
-    if command[0] == "usrs?":
+    if command[0].lower() == "usrs?":
         sekretaer.usr_db(chat_id)
-    if command[0] == "timer?":
+    if command[0].lower() == "timer?":
         sending_msg = ("[t on Beschreibung] = starte Timer mit Beschreibung"
                        "\n[t off TimerID] = Timer mit ID beenden"
                        "\n[t del TimerID] = Timer mit ID loeschen"
                        "\n[t timers?] = alle Timer anzeigen")
 
         bot.sendMessage(chat_id, sending_msg)
-    if command[0] == 'notizen?':
+    if command[0].lower() == 'notizen?':
         sending_msg = ("[addnote Notat] = Notat/Notiz hinzufuegen"
                        "\n[delnote NotizID] = NotizID loeschen"
                        "\n[notes?] = alle eigenen/Channel  Notizen auflisten")
         bot.sendMessage(chat_id, sending_msg)
-    if command[0] == "aup?":
+    if command[0].lower() == "aup?":
         bot.sendMessage(chat_id, "[aup USERID KEY VALUE] => add user property")
     if command[0] == "hash?":
         sending_msg = ("!!! Funktion NUR im privaten Chat moeglich !!!"
@@ -400,39 +400,39 @@ def on_chat_message(msg):
                        "\n[hash HASHTYPE URL/file] = HASHTYPE wird auf URL/file angewendet")
         bot.sendMessage(chat_id, sending_msg)
     if len(command) == 4:
-        if command[0] == "aup":
+        if command[0].lower() == "aup":
             sekretaer.usr_add_prop(chat_id, int(command[1]), command[2], command[3])
 
-    if command[0] == "dup?":
+    if command[0].lower() == "dup?":
         bot.sendMessage(chat_id, "[dup USERID KEY] => delete user property")
 
     if len(command) == 3:
-        if command[0] == "dup":
+        if command[0].lower() == "dup":
             sekretaer.usr_del_prop(chat_id, int(command[1]), command[2])
 
-    if command[0] == 'addnote':
+    if command[0].lower() == 'addnote':
         tmp_user = msg['from']['first_name']
         sekretaer.addnote(command, tmp_user)
         bot.sendMessage(chat_id, "Notiz notiert!")
 
-    if command[0] == 'notes?':
+    if command[0].lower() == 'notes?':
         sekretaer.show_notes(chat_id)
 
-    if command[0] == 'rrresetnotes':
+    if command[0].lower() == 'rrresetnotes':
         sekretaer.resetnotes()
-    if command[0] == 't':
+    if command[0].lower() == 't':
         if len(command) > 2:
-            if command[1] == 'on':
+            if command[1].lower() == 'on':
                 sekretaer.calc_Events(chat_id, command[1], command[2::])
-            if command[1] == 'off':
+            if command[1].lower() == 'off':
                 sekretaer.calc_Events(chat_id, command[1], command[2])
-            if command[1] == 'del':
+            if command[1].lower() == 'del':
                 try:
                     sekretaer.del_user_Event(chat_id, int(command[2]))
                 except:
                     print "error in del user event"
 
-        if len(command) == 2 and command[1] == 'timers?':
+        if len(command) == 2 and command[1].lower() == 'timers?':
             try:
                 sekretaer.check_Events_running(chat_id)
             except:
@@ -444,26 +444,26 @@ def on_chat_message(msg):
         else:
             bot.sendMessage(chat_id, "zu viele Argumente")
 
-    if 'onair' in command:
+    if 'onair' in command or 'Onair' in command:
         sending_msg = 'effektiv bin ich seit %s da.' % time_started
         bot.sendMessage(chat_id, sending_msg)
 
-    if 'wu' in command:
+    if 'wu' in command or 'Wu' in command:
         return bot.sendPhoto(chat_id, photo_Wu)
 
-    if command[0] == 'git?':
+    if command[0].lower() == 'git?':
         this_msg = 'GitHub repositry:\n%s' % git_rep_link
         bot.sendMessage(chat_id, this_msg, 'Markdown')
 
-    if 'verein' in command:
+    if 'verein' in command or 'Verein' in command:
         this_msg = 'Verein?! Beschder Verein:\n *%s!*' % bot.getChat(chat_id)['title']
         bot.sendMessage(chat_id, this_msg, 'Markdown')
     # 'Markdown' fuer ** bold schreiben / Formatierung
-    if chat_type == 'private' and command[0] == 'invite':
+    if chat_type == 'private' and command[0].lower() == 'invite':
         user_id = msg['from']['id']
         user_msg = command[0]
         sekretaer.usr_invite(user_id, user_msg)
-    if chat_type == 'private' and command[0] == 'hash':
+    if chat_type == 'private' and command[0].lower() == 'hash':
         if len(command) == 3:  # MD5,SHA1, SHA256, SHA384, SHA512"
 	    tmp_cmd = command
             myHash = md5.HASH()
