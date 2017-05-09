@@ -2,6 +2,7 @@ import sys
 from time import strftime, mktime, strptime, gmtime, time, sleep
 import threading
 import telepot, pickle, datetime
+from telepot.loop import MessageLoop
 import pprint
 import google_class, md5, urllib2
 
@@ -35,6 +36,7 @@ class BotManagement(object):
         self.invite_dict = {}
         self.event_Timer_dict = {}
         self.today_Event_dic_count = 0
+	self.newMessage = False
         self.load()
 
     def addChannel(self, key, value):
@@ -302,7 +304,7 @@ class BotManagement(object):
 def on_chat_message(msg):
     global time_started
     global onpi
-
+    sekretaer.newMessage = True
     if msg['from']['id'] not in sekretaer.users:
         temp_dict = msg['from']
         sekretaer.users[temp_dict.pop('id')] = [temp_dict]
@@ -314,11 +316,11 @@ def on_chat_message(msg):
 
     content_type, chat_type, chat_id = telepot.glance(msg)
 
-    if chat_type=='private' and  chat_id == 296276669:  # id bm
-        command = msg['text'].split()
-
-        if len(command) <= 4:
-            if command[0].lower() == 'gc':  # google calendar
+    if chat_type=='private' and  chat_id == 296276669 and msg['text'].split()[0].lower() == 'gc':  # id bm
+	  print "bin in gc-part"
+	  command = msg['text'].split()
+	  print command
+      	  if len(command) <= 4:
                 mygoogle = google_class.Google()
                 if command[1] == 's':  # s for search
                     hours_minutes_string = mygoogle.show_Events(command[2])
@@ -350,8 +352,8 @@ def on_chat_message(msg):
                         print "------------------------------------------------ Error in Gcon u!!!"
                         bot.sendMessage(chat_id, 'Event ID not found')
                 del mygoogle
-        else:
-            bot.sendMessage(chat_id, 'zu viele Argumente')
+	  else:
+		bot.sendMessage(chat_id, 'zu viele Argumente')
 
     # HIER WERDEN NACHRICHTEN INFOS ANGEZEIGT:
     print('Chat:', content_type, chat_type, chat_id)
@@ -481,15 +483,16 @@ def on_chat_message(msg):
                 bot.sendMessage(chat_id, "ERROR wrong hash_flag!")
                 print "ERROR wrong hash_flag!"
                 return
-            if sekretaer.checkurl(command[2]):
-		
+            if sekretaer.checkurl(tmp_cmd[2]):
+		bot.sendMessage(chat_id, 'downloading file ...')
+		print command
 		# sekretaer.hashLib.update({chat_id: {datetime.datetime.utcnow().isoformat()[:-7]: command[2]}})		
-		hashed = myHash.hashFromURL(command[2])
+		hashed = myHash.hashFromURL(tmp_cmd[2])
                 sending_msg = ("ich habe folgenden hash gefunden"
                                "\nhashtype: {}"
                                "\nhashed file: {}"
-                               "\nhash: {}").format(command[1], myHash.downloaded_file, hashed)
-               	print command[1], myHash.downloaded_file, hashed
+                               "\nhash: {}").format(tmp_cmd[1], myHash.downloaded_file, hashed)
+               	print tmp_cmd[1], myHash.downloaded_file, hashed
                 bot.sendMessage(chat_id, sending_msg)
             else:
                 bot.sendMessage(chat_id, "ERROR with URL!")
@@ -547,12 +550,9 @@ sekretaer = BotManagement(settings_2load)  # lokalen Bot erzeugen und settings l
 # Botsettins Config until HERE
 
 bot = telepot.Bot(sekretaer.connectionKey())
-answerer = telepot.helper.Answerer(bot)
+#answerer = telepot.helper.Answerer(bot)
 try:
-    bot.message_loop({'chat': on_chat_message,
-                      'callback_query': on_callback_query,
-                      'inline_query': on_inline_query,
-                      'chosen_inline_result': on_chosen_inline_result})
+    MessageLoop(bot, {'chat': on_chat_message}).run_as_thread()
     print('Listening ...')
 except:
     e = sys.exc_info()[1]
@@ -561,32 +561,48 @@ except:
 
 try:
     safe_count = 0
+    time2sleep = 1
+    silence = 0
     while 1:
         print '------------------------------------------------ SAVE COUNT {} ------------------------------------------------'.format(
             safe_count)
+
+	print 'silence', silence, 'time2sleep', time2sleep
+	if silence >= 1337 : #overflow protection
+		silence = 0
         if safe_count == 20:  # nach einer Minute speichern
             try:
                 sekretaer.save()
-                print '------------------------------------------------ ++ auto save done'
+                #print '------------------------------------------------ ++ auto save done'
                 safe_count = 0
             except:
                 e = sys.exc_info()[1]
                 print "------------------------------------------------ -- auto save Error!"
                 print e
                 safe_count = 0
-        print "channels: DISABLED"
+	if sekretaer.newMessage == False:
+		print "in new Message False"
+		if silence % 5  == 0 and time2sleep <= 10:
+			time2sleep +=1
+	else:
+		print "in True"
+		sekretaer.newMessage = False
+		time2sleep = 1
+		silence = 0
+	
+        #print "channels: DISABLED"
         # print pprint.pprint(sekretaer.channels.keys())
-        print "users: DISABLED"
+        #print "users: DISABLED"
         # print pprint.pprint(sekretaer.users)
-        print "notes: DISABLED"
+        #print "notes: DISABLED"
         # print pprint.pprint(sekretaer.notes)
         # print "user timers:"
         # print pprint.pprint(sekretaer.event_Timer_dict)
-        print "invite dict: DISABLED"
+        #print "invite dict: DISABLED"
         # print sekretaer.invite_dict
-        
+        silence +=1
 	safe_count += 1
-        sleep(3)
+        sleep(time2sleep)
 
 except:
     try:
